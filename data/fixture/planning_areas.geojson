@@ -1,0 +1,73 @@
+{
+ "type": "FeatureCollection",
+ "features": [
+  {
+   "type": "Feature",
+   "properties": {
+    "planning_area": "ALPHA",
+    "region": "WEST REGION"
+   },
+   "geometry": {
+    "type": "Polygon",
+    "coordinates": [
+     [
+      [
+       103.8,
+       1.35
+      ],
+      [
+       103.81,
+       1.35
+      ],
+      [
+       103.81,
+       1.36
+      ],
+      [
+       103.8,
+       1.36
+      ],
+      [
+       103.8,
+       1.35
+      ]
+     ]
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "planning_area": "BETA",
+    "region": "EAST REGION"
+   },
+   "geometry": {
+    "type": "Polygon",
+    "coordinates": [
+     [
+      [
+       103.81,
+       1.35
+      ],
+      [
+       103.82,
+       1.35
+      ],
+      [
+       103.82,
+       1.36
+      ],
+      [
+       103.81,
+       1.36
+      ],
+      [
+       103.81,
+       1.35
+      ]
+     ]
+    ]
+   }
+  }
+ ]
+}

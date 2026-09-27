@@ -1,0 +1,152 @@
+{
+ "meta": {
+  "run_at": "2026-09-27T20:00:44+0800",
+  "model": "qwen3.5:4b",
+  "reasoning_effort": "none",
+  "model_endpoint_host": "127.0.0.1",
+  "prescreen": true,
+  "max_rows": 200,
+  "query_timeout_s": 5.0,
+  "python": "3.11.5",
+  "duckdb": "1.5.5",
+  "platform": "Windows-10-10.0.26200-SP0",
+  "gpu": "NVIDIA GeForce GTX 1650",
+  "questions": 68,
+  "split": "all",
+  "kind": "all"
+ },
+ "summary": {
+  "auto (derived)": {
+   "dev": {
+    "answerable": 26,
+    "correct": 25,
+    "execution_accuracy": 0.9615,
+    "answered_but_wrong": 1,
+    "refused_answerable": 0,
+    "adversarial": 8,
+    "adversarial_refused": 8,
+    "adversarial_refusal_rate": 1.0,
+    "latency_ms_median": 8479.7,
+    "latency_ms_p90": 12051.5,
+    "latency_ms_max": 45736.9,
+    "repairs_used": 1
+   },
+   "test": {
+    "answerable": 26,
+    "correct": 21,
+    "execution_accuracy": 0.8077,
+    "answered_but_wrong": 4,
+    "refused_answerable": 1,
+    "adversarial": 8,
+    "adversarial_refused": 8,
+    "adversarial_refusal_rate": 1.0,
+    "latency_ms_median": 8779.5,
+    "latency_ms_p90": 12684.8,
+    "latency_ms_max": 34516.0,
+    "repairs_used": 2
+   },
+   "all": {
+    "answerable": 52,
+    "correct": 46,
+    "execution_accuracy": 0.8846,
+    "answered_but_wrong": 5,
+    "refused_answerable": 1,
+    "adversarial": 16,
+    "adversarial_refused": 16,
+    "adversarial_refusal_rate": 1.0,
+    "latency_ms_median": 8705.0,
+    "latency_ms_p90": 12255.7,
+    "latency_ms_max": 45736.9,
+    "repairs_used": 3
+   }
+  },
+  "llm": {
+   "dev": {
+    "answerable": 26,
+    "correct": 25,
+    "execution_accuracy": 0.9615,
+    "answered_but_wrong": 1,
+    "refused_answerable": 0,
+    "adversarial": 8,
+    "adversarial_refused": 8,
+    "adversarial_refusal_rate": 1.0,
+    "latency_ms_median": 8479.7,
+    "latency_ms_p90": 12051.5,
+    "latency_ms_max": 45736.9,
+    "repairs_used": 1
+   },
+   "test": {
+    "answerable": 26,
+    "correct": 21,
+    "execution_accuracy": 0.8077,
+    "answered_but_wrong": 3,
+    "refused_answerable": 2,
+    "adversarial": 8,
+    "adversarial_refused": 8,
+    "adversarial_refusal_rate": 1.0,
+    "latency_ms_median": 8779.5,
+    "latency_ms_p90": 12684.8,
+    "latency_ms_max": 34438.8,
+    "repairs_used": 2
+   },
+   "all": {
+    "answerable": 52,
+    "correct": 46,
+    "execution_accuracy": 0.8846,
+    "answered_but_wrong": 4,
+    "refused_answerable": 2,
+    "adversarial": 16,
+    "adversarial_refused": 16,
+    "adversarial_refusal_rate": 1.0,
+    "latency_ms_median": 8705.0,
+    "latency_ms_p90": 12255.7,
+    "latency_ms_max": 45736.9,
+    "repairs_used": 3
+   }
+  },
+  "template": {
+   "dev": {
+    "answerable": 26,
+    "correct": 26,
+    "execution_accuracy": 1.0,
+    "answered_but_wrong": 0,
+    "refused_answerable": 0,
+    "adversarial": 8,
+    "adversarial_refused": 8,
+    "adversarial_refusal_rate": 1.0,
+    "latency_ms_median": 12.4,
+    "latency_ms_p90": 30.4,
+    "latency_ms_max": 66.5,
+    "repairs_used": 0
+   },
+   "test": {
+    "answerable": 26,
+    "correct": 7,
+    "execution_accuracy": 0.2692,
+    "answered_but_wrong": 13,
+    "refused_answerable": 6,
+    "adversarial": 8,
+    "adversarial_refused": 8,
+    "adversarial_refusal_rate": 1.0,
+    "latency_ms_median": 8.9,
+    "latency_ms_p90": 109.8,
+    "latency_ms_max": 411.2,
+    "repairs_used": 0
+   },
+   "all": {
+    "answerable": 52,
+    "correct": 33,
+    "execution_accuracy": 0.6346,
+    "answered_but_wrong": 13,
+    "refused_answerable": 6,
+    "adversarial": 16,
+    "adversarial_refused": 16,
+    "adversarial_refusal_rate": 1.0,
+    "latency_ms_median": 10.8,
+    "latency_ms_p90": 61.0,
+    "latency_ms_max": 411.2,
+    "repairs_used": 0
+   }
+  }
+ }
+}

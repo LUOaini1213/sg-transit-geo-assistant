@@ -1,0 +1,107 @@
+{
+ "type": "FeatureCollection",
+ "features": [
+  {
+   "type": "Feature",
+   "properties": {
+    "subzone": "ALPHA SOUTH",
+    "planning_area": "ALPHA"
+   },
+   "geometry": {
+    "type": "Polygon",
+    "coordinates": [
+     [
+      [
+       103.8,
+       1.35
+      ],
+      [
+       103.81,
+       1.35
+      ],
+      [
+       103.81,
+       1.355
+      ],
+      [
+       103.8,
+       1.355
+      ],
+      [
+       103.8,
+       1.35
+      ]
+     ]
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "subzone": "ALPHA NORTH",
+    "planning_area": "ALPHA"
+   },
+   "geometry": {
+    "type": "Polygon",
+    "coordinates": [
+     [
+      [
+       103.8,
+       1.355
+      ],
+      [
+       103.81,
+       1.355
+      ],
+      [
+       103.81,
+       1.36
+      ],
+      [
+       103.8,
+       1.36
+      ],
+      [
+       103.8,
+       1.355
+      ]
+     ]
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "subzone": "BETA CENTRE",
+    "planning_area": "BETA"
+   },
+   "geometry": {
+    "type": "Polygon",
+    "coordinates": [
+     [
+      [
+       103.81,
+       1.35
+      ],
+      [
+       103.82,
+       1.35
+      ],
+      [
+       103.82,
+       1.36
+      ],
+      [
+       103.81,
+       1.36
+      ],
+      [
+       103.81,
+       1.35
+      ]
+     ]
+    ]
+   }
+  }
+ ]
+}

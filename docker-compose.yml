@@ -1,0 +1,32 @@
+# docker compose up --build   then open http://localhost:8080  (API docs: http://localhost:8080/docs)
+#
+# The API serves data/transit.duckdb if you have built it (see README); otherwise the small test fixture.
+# The model endpoint defaults to Ollama on the Docker host. Without a reachable model, choose the keyword engine.
+services:
+  api:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    environment:
+      TRANSIT_DB: /data/transit.duckdb
+      LLM_BASE_URL: ${LLM_BASE_URL:-http://host.docker.internal:11434/v1}
+      LLM_MODEL: ${LLM_MODEL:-qwen2.5:3b-16k}
+      LLM_REASONING_EFFORT: ${LLM_REASONING_EFFORT:-}
+      LLM_API_KEY: ${LLM_API_KEY:-not-needed}
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    volumes:
+      - ./data:/data:ro
+    read_only: true
+    tmpfs:
+      - /tmp
+    restart: unless-stopped
+
+  web:
+    build: ./frontend
+    ports:
+      - "8080:80"
+    depends_on:
+      api:
+        condition: service_healthy
+    restart: unless-stopped

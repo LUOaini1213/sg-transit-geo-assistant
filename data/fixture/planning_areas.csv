@@ -1,0 +1,3 @@
+planning_area,region,residents,coverage_straight_400m,coverage_walk_400m,residents_outside_walk_400m
+ALPHA,WEST REGION,12000,0.95,0.70,3600
+BETA,EAST REGION,8000,0.99,0.85,1200

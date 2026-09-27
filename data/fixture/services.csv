@@ -1,0 +1,5 @@
+service_no,direction,operator,category,origin_stop,destination_stop,am_peak_headway,pm_peak_headway
+1,1,SBST,TRUNK,10011,20011,08-10,10-12
+1,2,SBST,TRUNK,20011,10012,08-12,09-11
+2,1,SMRT,FEEDER,20011,20011,05-07,06-08
+3E,1,TTS,EXPRESS,10015,90001,-,15-20

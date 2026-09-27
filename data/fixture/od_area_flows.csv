@@ -1,0 +1,5 @@
+origin_area,destination_area,weekday_trips
+ALPHA,BETA,510
+BETA,ALPHA,280
+ALPHA,ALPHA,20
+BETA,BETA,90

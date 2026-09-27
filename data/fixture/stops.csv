@@ -1,0 +1,10 @@
+stop_code,stop_name,road_name,latitude,longitude
+10011,Alpha Stn,Alpha Rd,1.3525,103.8050
+10012,Opp Alpha Stn,Alpha Rd,1.3526,103.8052
+10013,Alpha Blk 5,Alpha Ave,1.3556,103.8050
+10014,Alpha's Blk 9,Alpha Ave,1.35655,103.8050
+10015,Alpha Edge,Border's Rd,1.3540,103.8099
+20011,Beta Int,Alpha Rd,1.3525,103.8150
+20012,Beta Mkt,Beta Rd,1.3580,103.8155
+20013,Opp Beta Mkt,Beta Rd,1.3581,103.8157
+90001,Offshore Jetty,Sea Rd,1.3525,103.8300

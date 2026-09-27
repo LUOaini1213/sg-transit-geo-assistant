@@ -1,0 +1,20 @@
+# environments and caches
+.venv/
+venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+node_modules/
+frontend/dist/
+.env
+*.log
+
+# data built locally from the sg-bus-network-monitor repository (LTA DataMall files are not redistributed)
+data/staging/
+data/*.duckdb
+data/*.duckdb.wal
+*.duckdb
+*.duckdb.wal
+
+# scratch evaluation runs (the committed results are eval/results/results.json and summary.json)
+eval/results/*_scratch.json
