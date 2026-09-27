@@ -126,7 +126,7 @@ ALLOWED_FUNCTIONS = frozenset({
     "first", "last", "argmax", "argmin",
     # scalar
     "abs", "round", "floor", "ceil", "sqrt", "pow", "ln", "log", "exp", "greatest", "least", "coalesce", "nullif",
-    "cast", "trycast", "if", "case", "lower", "upper", "length", "trim", "substring", "concat", "dpipe", "pad",
+    "cast", "trycast", "if", "case", "lower", "upper", "length", "trim", "substring", "concat", "dpipe",
     "replace", "left", "right", "strposition", "contains", "startswith", "endswith", "regexplike", "split",
     "splitpart", "div", "mod", "sign", "radians", "degrees", "sin", "cos", "atan2", "asin", "acos", "tan", "pi",
     "arraysize", "arraylength", "stringtoarray", "regexpsplit", "ifnull", "nvl", "exists", "arraycontains",

@@ -164,7 +164,11 @@ export default function App() {
         </div>
         <Legend showCoverage={showCoverage} inline />
         <footer className="meta">
-          Data: LTA DataMall, URA Master Plan 2019 (data.gov.sg), SingStat GHS 2025, OpenStreetMap, via{" "}
+          Contains information from LTA DataMall (bus stops, routes and passenger volumes, Aug&ndash;Sep 2026), the URA
+          Master Plan 2019 boundaries and SingStat GHS 2025, accessed September 2026 from datamall.lta.gov.sg,
+          data.gov.sg and singstat.gov.sg, made available under the{" "}
+          <a href="https://data.gov.sg/open-data-licence">Singapore Open Data Licence version 1.0</a>. Walking network
+          &copy; OpenStreetMap contributors. Prepared via{" "}
           <a href="https://github.com/LUOaini1213/sg-bus-network-monitor">sg-bus-network-monitor</a>. Click a stop for its trips.
         </footer>
       </aside>

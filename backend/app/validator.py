@@ -9,6 +9,7 @@ import re
 import sqlglot
 from sqlglot import exp
 from sqlglot.errors import ParseError
+from sqlglot.optimizer.scope import traverse_scope
 
 from .schema import ALLOWED_COLUMNS, ALLOWED_FUNCTIONS, ALLOWED_TABLES
 
@@ -18,7 +19,7 @@ MAX_SQL_CHARS = 4000
 _FORBIDDEN_NAMES = ["Insert", "Update", "Delete", "Drop", "Create", "Alter", "AlterTable", "Command", "Pragma", "Set",
                     "Copy", "Attach", "Detach", "Install", "Use", "Transaction", "Commit", "Rollback", "Merge", "Into",
                     "LoadData", "Describe", "Summarize", "Grant", "Revoke", "TruncateTable", "Export", "Placeholder",
-                    "Parameter", "Show", "Analyze", "Kill", "Refresh", "Cache", "Uncache"]
+                    "Parameter", "Show", "Analyze", "Kill", "Refresh", "Cache", "Uncache", "TableSample"]
 FORBIDDEN_NODES = tuple(t for t in (getattr(exp, n, None) for n in _FORBIDDEN_NAMES) if isinstance(t, type))
 
 _QUERY_ROOTS = (exp.Select, exp.Union, exp.Intersect, exp.Except)
@@ -56,6 +57,31 @@ def _cte_names(tree: exp.Expression) -> set[str]:
     return {c.alias_or_name.lower() for c in tree.find_all(exp.CTE)}
 
 
+_SYSTEM_PREFIXES = ("duckdb_", "sqlite_", "pg_", "information_schema")
+
+
+def _check_sources_by_scope(tree: exp.Expression) -> None:
+    """Resolve every FROM/JOIN source in the scope where it is used.
+
+    A name only counts as a CTE where that CTE is visible, and a non-recursive CTE is not visible inside its own
+    body. Without this, `WITH duckdb_tables AS (SELECT * FROM duckdb_tables) ...` would pass the allow-list,
+    because the inner reference has the same name as a CTE defined somewhere in the query."""
+    for w in tree.find_all(exp.With):
+        if w.args.get("recursive"):
+            raise Refusal("recursive_cte")
+    for name in _cte_names(tree):
+        if name.startswith(_SYSTEM_PREFIXES) or name in ALLOWED_TABLES:
+            raise Refusal("cte_name_not_allowed", name)
+    try:
+        scopes = traverse_scope(tree)
+    except Exception as e:  # sqlglot cannot resolve the query's scopes: refuse rather than guess
+        raise Refusal("parse_error", f"scope: {type(e).__name__}") from None
+    for scope in scopes:
+        for source in scope.sources.values():
+            if isinstance(source, exp.Table) and source.name.lower() not in ALLOWED_TABLES:
+                raise Refusal("unknown_table", source.name.lower())
+
+
 def validate(sql: str, max_rows: int = 200) -> str:
     """Return a safe, LIMITed version of `sql`, or raise Refusal."""
     if not sql or not sql.strip():
@@ -88,6 +114,7 @@ def validate(sql: str, max_rows: int = 200) -> str:
         name = t.name.lower()
         if name not in ALLOWED_TABLES and name not in ctes:
             raise Refusal("unknown_table", name)
+    _check_sources_by_scope(tree)
 
     for f in tree.find_all(exp.Func):
         if isinstance(f, exp.Connector):  # AND / OR are modelled as functions
@@ -108,15 +135,16 @@ def validate(sql: str, max_rows: int = 200) -> str:
 
 
 def _force_limit(tree: exp.Expression, max_rows: int) -> exp.Expression:
+    """Keep a LIMIT of at most max_rows; otherwise fetch max_rows + 1, so the caller can tell the result was cut."""
     if not isinstance(tree, exp.Select):
         # set operations: wrap so the limit applies to the whole result
-        return exp.select("*").from_(tree.subquery("q")).limit(max_rows)
+        return exp.select("*").from_(tree.subquery("q")).limit(max_rows + 1)
     limit = tree.args.get("limit")
     if limit is not None:
         value = limit.expression if isinstance(limit, exp.Limit) else None
         if isinstance(value, exp.Literal) and value.is_int and 0 <= int(value.this) <= max_rows:
             return tree
-    return tree.limit(max_rows, copy=True)
+    return tree.limit(max_rows + 1, copy=True)
 
 
 _CODE_BLOCK = re.compile(r"```(?:sql|duckdb)?\s*(.*?)```", re.S | re.I)

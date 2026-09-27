@@ -16,11 +16,25 @@ MUTANTS = [
     ("validator.py", "if isinstance(node, FORBIDDEN_NODES):", "if False:"),
     ("validator.py", "if not isinstance(t.this, exp.Identifier):", "if False:"),
     ("validator.py", 'if t.args.get("db") or t.args.get("catalog"):', 'if t.args.get("catalog"):'),
-    ("validator.py", "if name not in ALLOWED_TABLES and name not in ctes:", "if False:"),
+    # "if name not in ALLOWED_TABLES and name not in ctes" is no longer mutated: every table reference is also a scope
+    # source, so the scope check below refuses the same queries (an equivalent mutant). It stays as a second check.
     ("validator.py", "if name not in ALLOWED_FUNCTIONS:", "if False:"),
     ("validator.py", "if name not in ALLOWED_COLUMNS and name not in defined:", "if False:"),
     ("validator.py", "0 <= int(value.this) <= max_rows:", "0 <= int(value.this):"),
-    ("validator.py", 'return exp.select("*").from_(tree.subquery("q")).limit(max_rows)', "return tree"),
+    ("validator.py", 'return exp.select("*").from_(tree.subquery("q")).limit(max_rows + 1)', "return tree"),
+    ("validator.py", "    return tree.limit(max_rows + 1, copy=True)", "    return tree.limit(max_rows, copy=True)"),
+    # added after review (2026-09-28): scope-aware CTE resolution and result size limits
+    ("validator.py", "    _check_sources_by_scope(tree)\n", "\n"),
+    ("validator.py", "            if isinstance(source, exp.Table) and source.name.lower() not in ALLOWED_TABLES:", "            if False:"),
+    ("validator.py", 'if w.args.get("recursive"):', "if False:"),
+    ("validator.py", "if name.startswith(_SYSTEM_PREFIXES) or name in ALLOWED_TABLES:", "if name in ALLOWED_TABLES:"),
+    ("db.py", "if isinstance(v, str) and n > MAX_CELL_CHARS:", "if False:"),
+    ("db.py", "if total > MAX_RESULT_BYTES:", "if False:"),
+    ("db.py", "while len(rows) <= max_rows:", "while len(rows) < max_rows:"),
+    ("schema.py", '"dpipe",', '"dpipe", "pad",'),
+    ("guard.py", r"|\b(when|how\s+long|how\s+soon)\b.{0,40}\barriv(e|al|ing)\b", r"|\barriv(e|al|ing)\b"),
+    ("guard.py", r"^\W*(please\s+)?(change|modify|rename|overwrite|set|update|edit)\b.{0,60}\b(to|as)\b",
+     r"\b(change|modify|rename|overwrite|set)\b.{0,60}\b(to|as)\b"),
     ("validator.py", 'if "CANNOT_ANSWER" in reply.upper():', 'if "CANNOT_ANSWER" in reply:'),
     # read-only connection
     ("db.py", "con = duckdb.connect(path, read_only=True)", "con = duckdb.connect(path, read_only=False)"),

@@ -2,7 +2,7 @@
 import duckdb
 import pytest
 
-from backend.app.db import QueryTimeout
+from backend.app.db import QueryTimeout, ResultTooLarge
 
 
 def test_connection_is_read_only(db):
@@ -42,3 +42,20 @@ def test_row_cap_sets_truncated(db):
     assert len(r.rows) == 4 and r.truncated
     r = db.query("SELECT * FROM range(4)", max_rows=4)
     assert len(r.rows) == 4 and not r.truncated
+
+
+def test_oversized_value_is_refused(db):
+    with pytest.raises(ResultTooLarge):
+        db.query("SELECT repeat('x', 20000) AS s", max_rows=200)
+
+
+def test_oversized_result_is_refused(db):
+    # five columns of 9,000 characters: every value is under the per-cell cap, 200 rows are over the byte budget
+    cols = ", ".join(f"repeat('x', 9000) AS c{i}" for i in range(5))
+    with pytest.raises(ResultTooLarge):
+        db.query(f"SELECT {cols} FROM range(1000)", max_rows=200)
+
+
+def test_normal_result_fits(db):
+    r = db.query("SELECT repeat('x', 100) AS s FROM range(50)", max_rows=200)
+    assert len(r.rows) == 50 and not r.truncated

@@ -1,6 +1,6 @@
 {
  "meta": {
-  "run_at": "2026-09-28T01:42:48+0800",
+  "run_at": "2026-09-27T20:04:48+0800",
   "model": "qwen3.5:4b",
   "reasoning_effort": "none",
   "model_endpoint_host": "127.0.0.1",
@@ -12,7 +12,6 @@
   "platform": "Windows-10-10.0.26200-SP0",
   "gpu": "NVIDIA GeForce GTX 1650",
   "questions": 16,
-  "question_file": "eval/questions.jsonl",
   "split": "all",
   "kind": "adversarial"
  },
@@ -27,14 +26,10 @@
     "adversarial": 8,
     "adversarial_refused": 7,
     "adversarial_refusal_rate": 0.875,
-    "benign": 0,
-    "benign_refused": 0,
-    "benign_refused_by_screen": 0,
-    "false_refusal_rate": null,
-    "latency_ms_median": 6378.6,
-    "latency_ms_p90": 10689.4,
-    "latency_ms_max": 37743.3,
-    "repairs_used": 1
+    "latency_ms_median": 5956.2,
+    "latency_ms_p90": 10191.9,
+    "latency_ms_max": 54201.6,
+    "repairs_used": 0
    },
    "test": {
     "answerable": 0,
@@ -45,13 +40,9 @@
     "adversarial": 8,
     "adversarial_refused": 7,
     "adversarial_refusal_rate": 0.875,
-    "benign": 0,
-    "benign_refused": 0,
-    "benign_refused_by_screen": 0,
-    "false_refusal_rate": null,
-    "latency_ms_median": 6403.6,
-    "latency_ms_p90": 8420.3,
-    "latency_ms_max": 9179.8,
+    "latency_ms_median": 6064.9,
+    "latency_ms_p90": 7345.3,
+    "latency_ms_max": 9324.8,
     "repairs_used": 0
    },
    "all": {
@@ -63,14 +54,10 @@
     "adversarial": 16,
     "adversarial_refused": 14,
     "adversarial_refusal_rate": 0.875,
-    "benign": 0,
-    "benign_refused": 0,
-    "benign_refused_by_screen": 0,
-    "false_refusal_rate": null,
-    "latency_ms_median": 6403.6,
-    "latency_ms_p90": 10689.4,
-    "latency_ms_max": 37743.3,
-    "repairs_used": 1
+    "latency_ms_median": 5988.4,
+    "latency_ms_p90": 10191.9,
+    "latency_ms_max": 54201.6,
+    "repairs_used": 0
    }
   },
   "llm": {
@@ -83,14 +70,10 @@
     "adversarial": 8,
     "adversarial_refused": 7,
     "adversarial_refusal_rate": 0.875,
-    "benign": 0,
-    "benign_refused": 0,
-    "benign_refused_by_screen": 0,
-    "false_refusal_rate": null,
-    "latency_ms_median": 6378.6,
-    "latency_ms_p90": 10689.4,
-    "latency_ms_max": 37743.3,
-    "repairs_used": 1
+    "latency_ms_median": 5956.2,
+    "latency_ms_p90": 10191.9,
+    "latency_ms_max": 54201.6,
+    "repairs_used": 0
    },
    "test": {
     "answerable": 0,
@@ -101,13 +84,9 @@
     "adversarial": 8,
     "adversarial_refused": 7,
     "adversarial_refusal_rate": 0.875,
-    "benign": 0,
-    "benign_refused": 0,
-    "benign_refused_by_screen": 0,
-    "false_refusal_rate": null,
-    "latency_ms_median": 6403.6,
-    "latency_ms_p90": 8420.3,
-    "latency_ms_max": 9179.8,
+    "latency_ms_median": 6064.9,
+    "latency_ms_p90": 7345.3,
+    "latency_ms_max": 9324.8,
     "repairs_used": 0
    },
    "all": {
@@ -119,14 +98,10 @@
     "adversarial": 16,
     "adversarial_refused": 14,
     "adversarial_refusal_rate": 0.875,
-    "benign": 0,
-    "benign_refused": 0,
-    "benign_refused_by_screen": 0,
-    "false_refusal_rate": null,
-    "latency_ms_median": 6403.6,
-    "latency_ms_p90": 10689.4,
-    "latency_ms_max": 37743.3,
-    "repairs_used": 1
+    "latency_ms_median": 5988.4,
+    "latency_ms_p90": 10191.9,
+    "latency_ms_max": 54201.6,
+    "repairs_used": 0
    }
   },
   "template": {
@@ -139,13 +114,9 @@
     "adversarial": 8,
     "adversarial_refused": 5,
     "adversarial_refusal_rate": 0.625,
-    "benign": 0,
-    "benign_refused": 0,
-    "benign_refused_by_screen": 0,
-    "false_refusal_rate": null,
-    "latency_ms_median": 1.6,
-    "latency_ms_p90": 20.8,
-    "latency_ms_max": 97.1,
+    "latency_ms_median": 10.2,
+    "latency_ms_p90": 71.4,
+    "latency_ms_max": 350.9,
     "repairs_used": 0
    },
    "test": {
@@ -157,13 +128,9 @@
     "adversarial": 8,
     "adversarial_refused": 4,
     "adversarial_refusal_rate": 0.5,
-    "benign": 0,
-    "benign_refused": 0,
-    "benign_refused_by_screen": 0,
-    "false_refusal_rate": null,
-    "latency_ms_median": 7.9,
-    "latency_ms_p90": 433.4,
-    "latency_ms_max": 476.4,
+    "latency_ms_median": 34.2,
+    "latency_ms_p90": 992.8,
+    "latency_ms_max": 1013.1,
     "repairs_used": 0
    },
    "all": {
@@ -175,13 +142,9 @@
     "adversarial": 16,
     "adversarial_refused": 9,
     "adversarial_refusal_rate": 0.5625,
-    "benign": 0,
-    "benign_refused": 0,
-    "benign_refused_by_screen": 0,
-    "false_refusal_rate": null,
-    "latency_ms_median": 1.7,
-    "latency_ms_p90": 433.4,
-    "latency_ms_max": 476.4,
+    "latency_ms_median": 10.3,
+    "latency_ms_p90": 992.8,
+    "latency_ms_max": 1013.1,
     "repairs_used": 0
    }
   }

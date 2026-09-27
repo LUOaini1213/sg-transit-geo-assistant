@@ -12,7 +12,7 @@ from dataclasses import asdict, dataclass, field
 import duckdb
 
 from . import geo, guard, llm
-from .db import Database, QueryTimeout
+from .db import Database, QueryTimeout, ResultTooLarge
 from .templates import TemplateEngine
 from .validator import Refusal, extract_sql, validate
 
@@ -57,6 +57,8 @@ class Assistant:
             return safe, self.db.query(safe, max_rows=self.max_rows, timeout_s=self.timeout_s)
         except QueryTimeout as e:
             raise _Unusable("timeout", str(e)) from None
+        except ResultTooLarge as e:
+            raise _Unusable("result_too_large", str(e)) from None
         except duckdb.Error as e:
             raise _Unusable("execution_error", str(e).splitlines()[0][:300]) from None
 

@@ -10,13 +10,16 @@ _PATTERNS = [
     ("write_request", r"\b(drop|truncate|alter)\s+(table|database|schema|view|index)\b"),
     ("write_request", r"\bdelete\s+(from\b|all\b|the\b|every\b)"),
     ("write_request", r"\binsert\s+into\b|\bupdate\s+\w+\s+set\b|\bcreate\s+(table|view|macro|index)\b"),
-    ("write_request", r"\b(change|modify|rename|overwrite|set)\b.{0,60}\b(to|as)\b.{0,30}$"),
+    # an edit command ("Change X of <record> to Y"); "which stops changed from July to August" is a question
+    ("write_request", r"^\W*(please\s+)?(change|modify|rename|overwrite|set|update|edit)\b.{0,60}\b(to|as)\b"),
     ("sql_command", r"\b(pragma|attach|detach|install|copy)\b\s*[\w'\"(]"),
     ("file_access", r"\b(read_csv\w*|read_parquet|read_json\w*|read_text|glob|getenv)\b|[a-z]:[\\/]|/etc/|\.\./"),
     ("sql_injection", r";\s*(drop|delete|insert|update|alter|create|attach|copy|pragma)\b|'\s*;|--\s*$"),
     ("instruction_override", r"\b(ignore|disregard|forget)\b.{0,40}\b(instructions?|rules|prompt)\b"),
     ("instruction_override", r"\b(system prompt|developer mode|jailbreak|you are now)\b"),
-    ("future_or_realtime", r"\bwill\b.{0,60}\b(have|be|arrive|come)\b|\b(predict|forecast|projected)\b|\bnext\s+bus\b|\barriv(e|al|ing)\b"),
+    # real-time or future questions; "which services arrive at X" is about the timetable and is allowed
+    ("future_or_realtime", r"\bwill\b.{0,60}\b(have|be|arrive|come)\b|\b(predict|forecast|projected)\b|\bnext\s+bus\b"
+                           r"|\b(when|how\s+long|how\s+soon)\b.{0,40}\barriv(e|al|ing)\b|\barriv(e|al|ing)\b.{0,20}\b(now|soon)\b"),
     ("secret_request", r"\b(api[\s_-]?key|password|secret|token|credential)s?\b"),
 ]
 _COMPILED = [(code, re.compile(p, re.I)) for code, p in _PATTERNS]

@@ -59,7 +59,7 @@ export default function MapView({ layers, showStops, showCoverage, onStopClick }
       style: STYLE,
       center: [103.82, 1.352],
       zoom: 10.4,
-      attributionControl: { compact: true },
+      attributionControl: { compact: false },
     });
     mapRef.current = map;
     if (import.meta.env.DEV) (window as unknown as { __map?: unknown }).__map = map; // for debugging in the browser console

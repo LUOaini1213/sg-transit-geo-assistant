@@ -15,7 +15,7 @@ def test_model_answer_shows_sql_and_row_count(make_assistant):
     ans = a.ask("How many stops are in Alpha?", engine="llm")
     assert ans.status == "answered" and ans.engine == "llm"
     assert ans.rows == [[5]] and ans.row_count == 1
-    assert ans.sql.startswith("SELECT") and "LIMIT 200" in ans.sql
+    assert ans.sql.startswith("SELECT") and "LIMIT 201" in ans.sql
     assert len(chat.calls) == 1
 
 
@@ -138,3 +138,12 @@ def test_prescreen_passes_every_answerable_eval_question():
 ])
 def test_prescreen_catches(text):
     assert guard.screen(text) is not None
+
+
+def test_truncated_is_reported_through_the_whole_pipeline(db):
+    # validator + database together: the validator must leave room for one extra row, or `truncated` is always False
+    from backend.app.validator import validate
+    res = db.query(validate("SELECT stop_code FROM stops", 3), max_rows=3)
+    assert len(res.rows) == 3 and res.truncated
+    res = db.query(validate("SELECT stop_code FROM stops LIMIT 2", 3), max_rows=3)
+    assert len(res.rows) == 2 and not res.truncated

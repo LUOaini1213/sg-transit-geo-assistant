@@ -10,6 +10,23 @@ class QueryTimeout(Exception):
     pass
 
 
+class ResultTooLarge(Exception):
+    pass
+
+
+# The row limit alone does not bound the size of an answer: one generated string column can be megabytes long.
+MAX_CELL_CHARS = 10_000
+MAX_RESULT_BYTES = 5_000_000
+
+
+def _size(v) -> int:
+    if isinstance(v, (str, bytes, bytearray)):
+        return len(v)
+    if isinstance(v, (list, tuple, dict)):
+        return len(repr(v))
+    return 16
+
+
 @dataclass
 class QueryResult:
     columns: list[str]
@@ -55,7 +72,19 @@ class Database:
         try:
             cur.execute(sql, params or [])
             columns = [d[0] for d in cur.description]
-            rows = cur.fetchmany(max_rows + 1)
+            rows, total = [], 0
+            while len(rows) <= max_rows:  # one row at a time, so an oversized answer is refused before it piles up
+                row = cur.fetchone()
+                if row is None:
+                    break
+                for v in row:
+                    n = _size(v)
+                    if isinstance(v, str) and n > MAX_CELL_CHARS:
+                        raise ResultTooLarge(f"a value of {n:,} characters (limit {MAX_CELL_CHARS:,})")
+                    total += n
+                if total > MAX_RESULT_BYTES:
+                    raise ResultTooLarge(f"result over {MAX_RESULT_BYTES:,} bytes")
+                rows.append(row)
         except duckdb.InterruptException:
             raise QueryTimeout(f"query exceeded {timeout_s:g} s") from None
         finally:

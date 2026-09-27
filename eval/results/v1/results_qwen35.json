@@ -1,6 +1,6 @@
 {
  "meta": {
-  "run_at": "2026-09-28T01:39:37+0800",
+  "run_at": "2026-09-27T20:00:44+0800",
   "model": "qwen3.5:4b",
   "reasoning_effort": "none",
   "model_endpoint_host": "127.0.0.1",
@@ -12,7 +12,6 @@
   "platform": "Windows-10-10.0.26200-SP0",
   "gpu": "NVIDIA GeForce GTX 1650",
   "questions": 68,
-  "question_file": "eval/questions.jsonl",
   "split": "all",
   "kind": "all"
  },
@@ -32,7 +31,7 @@
    "row_count": 10,
    "gold_row_count": 10,
    "correct": true,
-   "latency_ms": 37.6,
+   "latency_ms": 66.5,
    "model_calls": 0,
    "attempts": [
     {
@@ -56,7 +55,7 @@
    "row_count": 5,
    "gold_row_count": 5,
    "correct": true,
-   "latency_ms": 31.8,
+   "latency_ms": 40.6,
    "model_calls": 0,
    "attempts": [
     {
@@ -75,12 +74,12 @@
    "status": "answered",
    "reason": null,
    "detail": null,
-   "sql": "SELECT COUNT(*) AS n_stops FROM stops WHERE planning_area = 'BEDOK' LIMIT 201",
+   "sql": "SELECT COUNT(*) AS n_stops FROM stops WHERE planning_area = 'BEDOK' LIMIT 200",
    "gold_sql": "SELECT count(*) FROM stops WHERE planning_area = 'BEDOK'",
    "row_count": 1,
    "gold_row_count": 1,
    "correct": true,
-   "latency_ms": 24.5,
+   "latency_ms": 14.0,
    "model_calls": 0,
    "attempts": [
     {
@@ -99,12 +98,12 @@
    "status": "answered",
    "reason": null,
    "detail": null,
-   "sql": "SELECT COUNT(*) AS n_stops FROM stops WHERE planning_area = 'JURONG WEST' LIMIT 201",
+   "sql": "SELECT COUNT(*) AS n_stops FROM stops WHERE planning_area = 'JURONG WEST' LIMIT 200",
    "gold_sql": "SELECT count(*) FROM stops WHERE planning_area = 'JURONG WEST'",
    "row_count": 1,
    "gold_row_count": 1,
    "correct": true,
-   "latency_ms": 5.2,
+   "latency_ms": 8.3,
    "model_calls": 0,
    "attempts": [
     {
@@ -123,12 +122,12 @@
    "status": "answered",
    "reason": null,
    "detail": null,
-   "sql": "SELECT region, COUNT(*) AS n_stops FROM stops WHERE NOT region IS NULL GROUP BY region ORDER BY n_stops DESC LIMIT 201",
+   "sql": "SELECT region, COUNT(*) AS n_stops FROM stops WHERE NOT region IS NULL GROUP BY region ORDER BY n_stops DESC LIMIT 200",
    "gold_sql": "SELECT region, count(*) FROM stops WHERE region IS NOT NULL GROUP BY region",
    "row_count": 5,
    "gold_row_count": 5,
    "correct": true,
-   "latency_ms": 17.4,
+   "latency_ms": 7.0,
    "model_calls": 0,
    "attempts": [
     {
@@ -147,12 +146,12 @@
    "status": "answered",
    "reason": null,
    "detail": null,
-   "sql": "SELECT region, COUNT(*) AS n_stops FROM stops WHERE NOT region IS NULL GROUP BY region ORDER BY n_stops DESC LIMIT 201",
+   "sql": "SELECT region, COUNT(*) AS n_stops FROM stops WHERE NOT region IS NULL GROUP BY region ORDER BY n_stops DESC LIMIT 200",
    "gold_sql": "SELECT planning_area, count(*) FROM stops WHERE region = 'NORTH REGION' GROUP BY planning_area",
    "row_count": 5,
    "gold_row_count": 7,
    "correct": false,
-   "latency_ms": 15.7,
+   "latency_ms": 9.4,
    "model_calls": 0,
    "attempts": [
     {
@@ -171,12 +170,12 @@
    "status": "answered",
    "reason": null,
    "detail": null,
-   "sql": "SELECT stop_code, stop_name, weekday_boardings FROM stops WHERE stop_code IN ('01012') LIMIT 201",
+   "sql": "SELECT stop_code, stop_name, weekday_boardings FROM stops WHERE stop_code IN ('01012') LIMIT 200",
    "gold_sql": "SELECT weekday_boardings FROM stops WHERE stop_code = '01012'",
    "row_count": 1,
    "gold_row_count": 1,
    "correct": true,
-   "latency_ms": 13.1,
+   "latency_ms": 10.4,
    "model_calls": 0,
    "attempts": [
     {
@@ -200,7 +199,7 @@
    "row_count": 0,
    "gold_row_count": 1,
    "correct": false,
-   "latency_ms": 2.0,
+   "latency_ms": 3.4,
    "model_calls": 0,
    "attempts": []
   },
@@ -214,12 +213,12 @@
    "status": "answered",
    "reason": null,
    "detail": null,
-   "sql": "SELECT DISTINCT service_no FROM route_stops WHERE stop_code IN ('08057') ORDER BY service_no LIMIT 201",
+   "sql": "SELECT DISTINCT service_no FROM route_stops WHERE stop_code IN ('08057') ORDER BY service_no LIMIT 200",
    "gold_sql": "SELECT DISTINCT service_no FROM route_stops WHERE stop_code = '08057'",
    "row_count": 33,
    "gold_row_count": 33,
    "correct": true,
-   "latency_ms": 9.0,
+   "latency_ms": 9.7,
    "model_calls": 0,
    "attempts": [
     {
@@ -238,12 +237,12 @@
    "status": "answered",
    "reason": null,
    "detail": null,
-   "sql": "SELECT DISTINCT service_no FROM route_stops WHERE stop_code IN ('75009') ORDER BY service_no LIMIT 201",
+   "sql": "SELECT DISTINCT service_no FROM route_stops WHERE stop_code IN ('75009') ORDER BY service_no LIMIT 200",
    "gold_sql": "SELECT DISTINCT service_no FROM route_stops WHERE stop_code = '75009'",
    "row_count": 32,
    "gold_row_count": 32,
    "correct": true,
-   "latency_ms": 8.7,
+   "latency_ms": 13.7,
    "model_calls": 0,
    "attempts": [
     {
@@ -262,12 +261,12 @@
    "status": "answered",
    "reason": null,
    "detail": null,
-   "sql": "SELECT service_no, direction, n_stops FROM services WHERE service_no = '190' AND direction = 1 LIMIT 201",
+   "sql": "SELECT service_no, direction, n_stops FROM services WHERE service_no = '190' AND direction = 1 LIMIT 200",
    "gold_sql": "SELECT n_stops FROM services WHERE service_no = '190' AND direction = 1",
    "row_count": 1,
    "gold_row_count": 1,
    "correct": true,
-   "latency_ms": 6.9,
+   "latency_ms": 5.6,
    "model_calls": 0,
    "attempts": [
     {
@@ -286,12 +285,12 @@
    "status": "answered",
    "reason": null,
    "detail": null,
-   "sql": "SELECT * FROM services WHERE service_no = '858' LIMIT 201",
+   "sql": "SELECT * FROM services WHERE service_no = '858' LIMIT 200",
    "gold_sql": "SELECT route_km FROM services WHERE service_no = '858'",
    "row_count": 1,
    "gold_row_count": 1,
    "correct": true,
-   "latency_ms": 24.3,
+   "latency_ms": 11.7,
    "model_calls": 0,
    "attempts": [
     {
@@ -310,12 +309,12 @@
    "status": "answered",
    "reason": null,
    "detail": null,
-   "sql": "SELECT b.stop_code, b.stop_name, ROUND(SQRT(POWER(a.x_m - b.x_m, 2) + POWER(a.y_m - b.y_m, 2)), 1) AS distance_m FROM stops AS a JOIN stops AS b ON b.stop_code <> a.stop_code WHERE a.stop_code IN ('08057') AND SQRT(POWER(a.x_m - b.x_m, 2) + POWER(a.y_m - b.y_m, 2)) <= 300 ORDER BY distance_m LIMIT 201",
+   "sql": "SELECT b.stop_code, b.stop_name, ROUND(SQRT(POWER(a.x_m - b.x_m, 2) + POWER(a.y_m - b.y_m, 2)), 1) AS distance_m FROM stops AS a JOIN stops AS b ON b.stop_code <> a.stop_code WHERE a.stop_code IN ('08057') AND SQRT(POWER(a.x_m - b.x_m, 2) + POWER(a.y_m - b.y_m, 2)) <= 300 ORDER BY distance_m LIMIT 200",
    "gold_sql": "SELECT b.stop_code FROM stops a JOIN stops b ON b.stop_code <> a.stop_code WHERE a.stop_code = '08057' AND sqrt(power(a.x_m - b.x_m, 2) + power(a.y_m - b.y_m, 2)) <= 300",
    "row_count": 2,
    "gold_row_count": 2,
    "correct": true,
-   "latency_ms": 18.5,
+   "latency_ms": 17.0,
    "model_calls": 0,
    "attempts": [
     {
@@ -334,12 +333,12 @@
    "status": "answered",
    "reason": null,
    "detail": null,
-   "sql": "SELECT b.stop_code, b.stop_name, ROUND(SQRT(POWER(a.x_m - b.x_m, 2) + POWER(a.y_m - b.y_m, 2)), 1) AS distance_m FROM stops AS a JOIN stops AS b ON b.stop_code <> a.stop_code WHERE a.stop_code IN ('16009') AND SQRT(POWER(a.x_m - b.x_m, 2) + POWER(a.y_m - b.y_m, 2)) <= 500 ORDER BY distance_m LIMIT 201",
+   "sql": "SELECT b.stop_code, b.stop_name, ROUND(SQRT(POWER(a.x_m - b.x_m, 2) + POWER(a.y_m - b.y_m, 2)), 1) AS distance_m FROM stops AS a JOIN stops AS b ON b.stop_code <> a.stop_code WHERE a.stop_code IN ('16009') AND SQRT(POWER(a.x_m - b.x_m, 2) + POWER(a.y_m - b.y_m, 2)) <= 500 ORDER BY distance_m LIMIT 200",
    "gold_sql": "SELECT count(*) FROM stops a JOIN stops b ON b.stop_code <> a.stop_code WHERE a.stop_code = '16009' AND sqrt(power(a.x_m - b.x_m, 2) + power(a.y_m - b.y_m, 2)) <= 500",
    "row_count": 20,
    "gold_row_count": 1,
    "correct": false,
-   "latency_ms": 62.7,
+   "latency_ms": 77.2,
    "model_calls": 0,
    "attempts": [
     {
@@ -363,7 +362,7 @@
    "row_count": 5,
    "gold_row_count": 5,
    "correct": true,
-   "latency_ms": 35.9,
+   "latency_ms": 32.0,
    "model_calls": 0,
    "attempts": [
     {
@@ -387,7 +386,7 @@
    "row_count": 10,
    "gold_row_count": 25,
    "correct": false,
-   "latency_ms": 51.4,
+   "latency_ms": 49.1,
    "model_calls": 0,
    "attempts": [
     {
@@ -406,12 +405,12 @@
    "status": "answered",
    "reason": null,
    "detail": null,
-   "sql": "SELECT subzone, residents, coverage_walk_400m FROM subzones WHERE planning_area = 'BUKIT TIMAH' AND coverage_walk_400m < 0.5 ORDER BY coverage_walk_400m LIMIT 201",
+   "sql": "SELECT subzone, residents, coverage_walk_400m FROM subzones WHERE planning_area = 'BUKIT TIMAH' AND coverage_walk_400m < 0.5 ORDER BY coverage_walk_400m LIMIT 200",
    "gold_sql": "SELECT subzone FROM subzones WHERE planning_area = 'BUKIT TIMAH' AND coverage_walk_400m < 0.5",
    "row_count": 6,
    "gold_row_count": 6,
    "correct": true,
-   "latency_ms": 52.0,
+   "latency_ms": 28.1,
    "model_calls": 0,
    "attempts": [
     {
@@ -430,12 +429,12 @@
    "status": "answered",
    "reason": null,
    "detail": null,
-   "sql": "SELECT subzone, residents, coverage_walk_400m FROM subzones WHERE coverage_walk_400m < 0.4 ORDER BY coverage_walk_400m LIMIT 201",
+   "sql": "SELECT subzone, residents, coverage_walk_400m FROM subzones WHERE coverage_walk_400m < 0.4 ORDER BY coverage_walk_400m LIMIT 200",
    "gold_sql": "SELECT subzone FROM subzones WHERE residents >= 1000 AND coverage_walk_400m < 0.4",
    "row_count": 38,
    "gold_row_count": 28,
    "correct": false,
-   "latency_ms": 92.7,
+   "latency_ms": 109.8,
    "model_calls": 0,
    "attempts": [
     {
@@ -459,7 +458,7 @@
    "row_count": 5,
    "gold_row_count": 5,
    "correct": true,
-   "latency_ms": 37.7,
+   "latency_ms": 27.0,
    "model_calls": 0,
    "attempts": [
     {
@@ -483,7 +482,7 @@
    "row_count": 3,
    "gold_row_count": 3,
    "correct": true,
-   "latency_ms": 34.0,
+   "latency_ms": 21.4,
    "model_calls": 0,
    "attempts": [
     {
@@ -507,7 +506,7 @@
    "row_count": 5,
    "gold_row_count": 5,
    "correct": true,
-   "latency_ms": 26.4,
+   "latency_ms": 30.4,
    "model_calls": 0,
    "attempts": [
     {
@@ -531,7 +530,7 @@
    "row_count": 1,
    "gold_row_count": 1,
    "correct": false,
-   "latency_ms": 32.2,
+   "latency_ms": 17.4,
    "model_calls": 0,
    "attempts": [
     {
@@ -550,12 +549,12 @@
    "status": "answered",
    "reason": null,
    "detail": null,
-   "sql": "SELECT origin_area, destination_area, weekday_trips FROM od_area_flows WHERE origin_area = 'TAMPINES' AND destination_area = 'BEDOK' LIMIT 201",
+   "sql": "SELECT origin_area, destination_area, weekday_trips FROM od_area_flows WHERE origin_area = 'TAMPINES' AND destination_area = 'BEDOK' LIMIT 200",
    "gold_sql": "SELECT weekday_trips FROM od_area_flows WHERE origin_area = 'TAMPINES' AND destination_area = 'BEDOK'",
    "row_count": 1,
    "gold_row_count": 1,
    "correct": true,
-   "latency_ms": 22.2,
+   "latency_ms": 13.1,
    "model_calls": 0,
    "attempts": [
     {
@@ -574,12 +573,12 @@
    "status": "answered",
    "reason": null,
    "detail": null,
-   "sql": "SELECT origin_area, destination_area, weekday_trips FROM od_area_flows WHERE origin_area = 'WOODLANDS' AND destination_area = 'YISHUN' LIMIT 201",
+   "sql": "SELECT origin_area, destination_area, weekday_trips FROM od_area_flows WHERE origin_area = 'WOODLANDS' AND destination_area = 'YISHUN' LIMIT 200",
    "gold_sql": "SELECT weekday_trips FROM od_area_flows WHERE origin_area = 'WOODLANDS' AND destination_area = 'YISHUN'",
    "row_count": 1,
    "gold_row_count": 1,
    "correct": true,
-   "latency_ms": 52.9,
+   "latency_ms": 11.1,
    "model_calls": 0,
    "attempts": [
     {
@@ -603,7 +602,7 @@
    "row_count": 1,
    "gold_row_count": 1,
    "correct": true,
-   "latency_ms": 20.0,
+   "latency_ms": 12.0,
    "model_calls": 0,
    "attempts": [
     {
@@ -646,7 +645,7 @@
    "row_count": 4,
    "gold_row_count": 4,
    "correct": true,
-   "latency_ms": 25.4,
+   "latency_ms": 29.4,
    "model_calls": 0,
    "attempts": [
     {
@@ -670,7 +669,7 @@
    "row_count": 10,
    "gold_row_count": 1,
    "correct": false,
-   "latency_ms": 66.9,
+   "latency_ms": 61.0,
    "model_calls": 0,
    "attempts": [
     {
@@ -689,12 +688,12 @@
    "status": "answered",
    "reason": null,
    "detail": null,
-   "sql": "SELECT c.stop_code, s.stop_name, c.flag, c.pct_change, c.category FROM stop_changes AS c JOIN stops AS s USING (stop_code) WHERE flag = 'drop' ORDER BY c.pct_change LIMIT 201",
+   "sql": "SELECT c.stop_code, s.stop_name, c.flag, c.pct_change, c.category FROM stop_changes AS c JOIN stops AS s USING (stop_code) WHERE flag = 'drop' ORDER BY c.pct_change LIMIT 200",
    "gold_sql": "SELECT stop_code FROM stop_changes WHERE flag = 'drop'",
    "row_count": 4,
    "gold_row_count": 4,
    "correct": true,
-   "latency_ms": 31.9,
+   "latency_ms": 22.9,
    "model_calls": 0,
    "attempts": [
     {
@@ -713,12 +712,12 @@
    "status": "answered",
    "reason": null,
    "detail": null,
-   "sql": "SELECT c.stop_code, s.stop_name, c.flag, c.pct_change, c.category FROM stop_changes AS c JOIN stops AS s USING (stop_code) WHERE flag = 'surge' ORDER BY c.pct_change LIMIT 201",
+   "sql": "SELECT c.stop_code, s.stop_name, c.flag, c.pct_change, c.category FROM stop_changes AS c JOIN stops AS s USING (stop_code) WHERE flag = 'surge' ORDER BY c.pct_change LIMIT 200",
    "gold_sql": "SELECT count(*) FROM stop_changes WHERE flag = 'surge'",
    "row_count": 67,
    "gold_row_count": 1,
    "correct": false,
-   "latency_ms": 188.9,
+   "latency_ms": 178.0,
    "model_calls": 0,
    "attempts": [
     {
@@ -737,12 +736,12 @@
    "status": "answered",
    "reason": null,
    "detail": null,
-   "sql": "SELECT operator, COUNT(DISTINCT service_no) AS n_services FROM services GROUP BY operator ORDER BY n_services DESC LIMIT 201",
+   "sql": "SELECT operator, COUNT(DISTINCT service_no) AS n_services FROM services GROUP BY operator ORDER BY n_services DESC LIMIT 200",
    "gold_sql": "SELECT operator, count(DISTINCT service_no) FROM services GROUP BY operator",
    "row_count": 4,
    "gold_row_count": 4,
    "correct": true,
-   "latency_ms": 9.7,
+   "latency_ms": 9.5,
    "model_calls": 0,
    "attempts": [
     {
@@ -766,7 +765,7 @@
    "row_count": 0,
    "gold_row_count": 1,
    "correct": false,
-   "latency_ms": 1.6,
+   "latency_ms": 1.7,
    "model_calls": 0,
    "attempts": []
   },
@@ -785,7 +784,7 @@
    "row_count": 1,
    "gold_row_count": 1,
    "correct": true,
-   "latency_ms": 13.7,
+   "latency_ms": 15.2,
    "model_calls": 0,
    "attempts": [
     {
@@ -804,12 +803,12 @@
    "status": "answered",
    "reason": null,
    "detail": null,
-   "sql": "SELECT COUNT(*) AS n_stops FROM stops LIMIT 201",
+   "sql": "SELECT COUNT(*) AS n_stops FROM stops LIMIT 200",
    "gold_sql": "SELECT count(*) FROM stops WHERE n_services = 1",
    "row_count": 1,
    "gold_row_count": 1,
    "correct": false,
-   "latency_ms": 9.8,
+   "latency_ms": 6.9,
    "model_calls": 0,
    "attempts": [
     {
@@ -833,7 +832,7 @@
    "row_count": 1,
    "gold_row_count": 1,
    "correct": true,
-   "latency_ms": 12.0,
+   "latency_ms": 12.8,
    "model_calls": 0,
    "attempts": [
     {
@@ -852,12 +851,12 @@
    "status": "answered",
    "reason": null,
    "detail": null,
-   "sql": "SELECT COUNT(*) AS n_stops FROM stops WHERE planning_area = 'TANGLIN' LIMIT 201",
+   "sql": "SELECT COUNT(*) AS n_stops FROM stops WHERE planning_area = 'TANGLIN' LIMIT 200",
    "gold_sql": "SELECT residents_outside_walk_400m FROM planning_areas WHERE planning_area = 'TANGLIN'",
    "row_count": 1,
    "gold_row_count": 1,
    "correct": false,
-   "latency_ms": 9.2,
+   "latency_ms": 7.6,
    "model_calls": 0,
    "attempts": [
     {
@@ -876,12 +875,12 @@
    "status": "answered",
    "reason": null,
    "detail": null,
-   "sql": "SELECT planning_area, residents, stops_per_10k_residents FROM planning_areas WHERE residents > 0 AND residents >= 10000 AND stops_per_10k_residents < 8 ORDER BY stops_per_10k_residents LIMIT 201",
+   "sql": "SELECT planning_area, residents, stops_per_10k_residents FROM planning_areas WHERE residents > 0 AND residents >= 10000 AND stops_per_10k_residents < 8 ORDER BY stops_per_10k_residents LIMIT 200",
    "gold_sql": "SELECT planning_area FROM planning_areas WHERE residents >= 10000 AND stops_per_10k_residents < 8",
    "row_count": 5,
    "gold_row_count": 5,
    "correct": true,
-   "latency_ms": 30.8,
+   "latency_ms": 29.0,
    "model_calls": 0,
    "attempts": [
     {
@@ -905,7 +904,7 @@
    "row_count": 0,
    "gold_row_count": 1,
    "correct": false,
-   "latency_ms": 2.0,
+   "latency_ms": 1.6,
    "model_calls": 0,
    "attempts": []
   },
@@ -919,12 +918,12 @@
    "status": "answered",
    "reason": null,
    "detail": null,
-   "sql": "SELECT DISTINCT service_no FROM services WHERE am_peak_headway_min >= 20 ORDER BY service_no LIMIT 201",
+   "sql": "SELECT DISTINCT service_no FROM services WHERE am_peak_headway_min >= 20 ORDER BY service_no LIMIT 200",
    "gold_sql": "SELECT DISTINCT service_no FROM services WHERE am_peak_headway_min >= 20",
    "row_count": 53,
    "gold_row_count": 53,
    "correct": true,
-   "latency_ms": 11.4,
+   "latency_ms": 8.9,
    "model_calls": 0,
    "attempts": [
     {
@@ -962,12 +961,12 @@
    "status": "answered",
    "reason": null,
    "detail": null,
-   "sql": "SELECT stop_code, stop_name, road_name, weekday_boardings FROM stops WHERE planning_area = 'QUEENSTOWN' AND pm_peak_share > 0.6 ORDER BY weekday_boardings DESC LIMIT 201",
+   "sql": "SELECT stop_code, stop_name, road_name, weekday_boardings FROM stops WHERE planning_area = 'QUEENSTOWN' AND pm_peak_share > 0.6 ORDER BY weekday_boardings DESC LIMIT 200",
    "gold_sql": "SELECT stop_code FROM stops WHERE planning_area = 'QUEENSTOWN' AND pm_peak_share > 0.6",
    "row_count": 12,
    "gold_row_count": 12,
    "correct": true,
-   "latency_ms": 36.4,
+   "latency_ms": 43.0,
    "model_calls": 0,
    "attempts": [
     {
@@ -991,7 +990,7 @@
    "row_count": 10,
    "gold_row_count": 26,
    "correct": false,
-   "latency_ms": 32.0,
+   "latency_ms": 48.3,
    "model_calls": 0,
    "attempts": [
     {
@@ -1010,12 +1009,12 @@
    "status": "answered",
    "reason": null,
    "detail": null,
-   "sql": "SELECT SUM(weekday_boardings) AS total_weekday_boardings FROM stops WHERE region = 'CENTRAL REGION' LIMIT 201",
+   "sql": "SELECT SUM(weekday_boardings) AS total_weekday_boardings FROM stops WHERE region = 'CENTRAL REGION' LIMIT 200",
    "gold_sql": "SELECT sum(weekday_boardings) FROM stops WHERE region = 'CENTRAL REGION'",
    "row_count": 1,
    "gold_row_count": 1,
    "correct": true,
-   "latency_ms": 12.6,
+   "latency_ms": 8.6,
    "model_calls": 0,
    "attempts": [
     {
@@ -1034,12 +1033,12 @@
    "status": "answered",
    "reason": null,
    "detail": null,
-   "sql": "SELECT stop_code, stop_name, road_name, weekday_boardings FROM stops WHERE planning_area = 'PUNGGOL' ORDER BY weekday_boardings DESC LIMIT 201",
+   "sql": "SELECT stop_code, stop_name, road_name, weekday_boardings FROM stops WHERE planning_area = 'PUNGGOL' ORDER BY weekday_boardings DESC LIMIT 200",
    "gold_sql": "SELECT avg(weekday_boardings) FROM stops WHERE planning_area = 'PUNGGOL'",
    "row_count": 118,
    "gold_row_count": 1,
    "correct": false,
-   "latency_ms": 311.7,
+   "latency_ms": 369.1,
    "model_calls": 0,
    "attempts": [
     {
@@ -1058,12 +1057,12 @@
    "status": "answered",
    "reason": null,
    "detail": null,
-   "sql": "SELECT COUNT(*) AS n_stops FROM stops WHERE road_name = 'Orchard Rd' LIMIT 201",
+   "sql": "SELECT COUNT(*) AS n_stops FROM stops WHERE road_name = 'Orchard Rd' LIMIT 200",
    "gold_sql": "SELECT count(*) FROM stops WHERE road_name = 'Orchard Rd'",
    "row_count": 1,
    "gold_row_count": 1,
    "correct": true,
-   "latency_ms": 11.4,
+   "latency_ms": 13.6,
    "model_calls": 0,
    "attempts": [
     {
@@ -1082,12 +1081,12 @@
    "status": "answered",
    "reason": null,
    "detail": null,
-   "sql": "SELECT stop_code, stop_name, road_name, weekday_boardings FROM stops WHERE road_name = 'Clementi Rd' ORDER BY weekday_boardings DESC LIMIT 201",
+   "sql": "SELECT stop_code, stop_name, road_name, weekday_boardings FROM stops WHERE road_name = 'Clementi Rd' ORDER BY weekday_boardings DESC LIMIT 200",
    "gold_sql": "SELECT stop_code FROM stops WHERE road_name = 'Clementi Rd' AND weekday_boardings > 2000",
    "row_count": 26,
    "gold_row_count": 3,
    "correct": false,
-   "latency_ms": 87.9,
+   "latency_ms": 89.4,
    "model_calls": 0,
    "attempts": [
     {
@@ -1106,12 +1105,12 @@
    "status": "answered",
    "reason": null,
    "detail": null,
-   "sql": "SELECT service_no, direction, origin_stop, destination_stop FROM services WHERE service_no = '96' AND direction = 1 LIMIT 201",
+   "sql": "SELECT service_no, direction, origin_stop, destination_stop FROM services WHERE service_no = '96' AND direction = 1 LIMIT 200",
    "gold_sql": "SELECT origin_stop, destination_stop FROM services WHERE service_no = '96' AND direction = 1",
    "row_count": 1,
    "gold_row_count": 1,
    "correct": true,
-   "latency_ms": 17.8,
+   "latency_ms": 19.2,
    "model_calls": 0,
    "attempts": [
     {
@@ -1135,7 +1134,7 @@
    "row_count": 0,
    "gold_row_count": 1,
    "correct": false,
-   "latency_ms": 0.8,
+   "latency_ms": 0.7,
    "model_calls": 0,
    "attempts": []
   },
@@ -1149,12 +1148,12 @@
    "status": "answered",
    "reason": null,
    "detail": null,
-   "sql": "SELECT stop_code, stop_name, road_name, weekday_boardings FROM stops WHERE planning_area = 'TOA PAYOH' ORDER BY weekday_boardings DESC LIMIT 201",
+   "sql": "SELECT stop_code, stop_name, road_name, weekday_boardings FROM stops WHERE planning_area = 'TOA PAYOH' ORDER BY weekday_boardings DESC LIMIT 200",
    "gold_sql": "SELECT subzone FROM subzones WHERE planning_area = 'TOA PAYOH' ORDER BY n_stops DESC LIMIT 1",
    "row_count": 144,
    "gold_row_count": 1,
    "correct": false,
-   "latency_ms": 431.1,
+   "latency_ms": 411.2,
    "model_calls": 0,
    "attempts": [
     {
@@ -1173,12 +1172,12 @@
    "status": "answered",
    "reason": null,
    "detail": null,
-   "sql": "SELECT origin_area, destination_area, weekday_trips FROM od_area_flows WHERE origin_area = 'JURONG EAST' AND destination_area = 'CLEMENTI' LIMIT 201",
+   "sql": "SELECT origin_area, destination_area, weekday_trips FROM od_area_flows WHERE origin_area = 'JURONG EAST' AND destination_area = 'CLEMENTI' LIMIT 200",
    "gold_sql": "SELECT weekday_trips FROM od_area_flows WHERE origin_area = 'JURONG EAST' AND destination_area = 'CLEMENTI'",
    "row_count": 1,
    "gold_row_count": 1,
    "correct": true,
-   "latency_ms": 42.8,
+   "latency_ms": 21.0,
    "model_calls": 0,
    "attempts": [
     {
@@ -1197,12 +1196,12 @@
    "status": "answered",
    "reason": null,
    "detail": null,
-   "sql": "SELECT SUM(link_km) AS total_km FROM corridor_links WHERE n_services >= 10 LIMIT 201",
+   "sql": "SELECT SUM(link_km) AS total_km FROM corridor_links WHERE n_services >= 10 LIMIT 200",
    "gold_sql": "SELECT sum(link_km) FROM corridor_links WHERE n_services >= 10",
    "row_count": 1,
    "gold_row_count": 1,
    "correct": true,
-   "latency_ms": 8.4,
+   "latency_ms": 7.2,
    "model_calls": 0,
    "attempts": [
     {
@@ -1221,12 +1220,12 @@
    "status": "answered",
    "reason": null,
    "detail": null,
-   "sql": "SELECT subzone, residents, n_stops FROM subzones WHERE n_stops = 0 AND residents > 1000 ORDER BY residents DESC LIMIT 201",
+   "sql": "SELECT subzone, residents, n_stops FROM subzones WHERE n_stops = 0 AND residents > 1000 ORDER BY residents DESC LIMIT 200",
    "gold_sql": "SELECT subzone FROM subzones WHERE residents > 1000 AND n_stops = 0",
    "row_count": 3,
    "gold_row_count": 3,
    "correct": true,
-   "latency_ms": 24.3,
+   "latency_ms": 20.3,
    "model_calls": 0,
    "attempts": [
     {
@@ -1364,7 +1363,7 @@
    "row_count": 0,
    "gold_row_count": null,
    "correct": false,
-   "latency_ms": 1.5,
+   "latency_ms": 1.6,
    "model_calls": 0,
    "attempts": []
   },
@@ -1383,7 +1382,7 @@
    "row_count": 0,
    "gold_row_count": null,
    "correct": false,
-   "latency_ms": 1.6,
+   "latency_ms": 2.0,
    "model_calls": 0,
    "attempts": []
   },
@@ -1440,7 +1439,7 @@
    "row_count": 0,
    "gold_row_count": null,
    "correct": false,
-   "latency_ms": 1.5,
+   "latency_ms": 1.6,
    "model_calls": 0,
    "attempts": []
   },
@@ -1459,7 +1458,7 @@
    "row_count": 0,
    "gold_row_count": null,
    "correct": false,
-   "latency_ms": 0.0,
+   "latency_ms": 0.1,
    "model_calls": 0,
    "attempts": []
   },
@@ -1535,7 +1534,7 @@
    "row_count": 0,
    "gold_row_count": null,
    "correct": false,
-   "latency_ms": 1.3,
+   "latency_ms": 1.8,
    "model_calls": 0,
    "attempts": []
   },
@@ -1554,7 +1553,7 @@
    "row_count": 10,
    "gold_row_count": 10,
    "correct": true,
-   "latency_ms": 54953.3,
+   "latency_ms": 45736.9,
    "model_calls": 1,
    "attempts": [
     {
@@ -1578,7 +1577,7 @@
    "row_count": 5,
    "gold_row_count": 5,
    "correct": true,
-   "latency_ms": 16350.9,
+   "latency_ms": 11682.0,
    "model_calls": 1,
    "attempts": [
     {
@@ -1597,12 +1596,12 @@
    "status": "answered",
    "reason": null,
    "detail": null,
-   "sql": "SELECT COUNT(*) FROM stops WHERE planning_area = 'BEDOK' LIMIT 201",
+   "sql": "SELECT COUNT(*) FROM stops WHERE planning_area = 'BEDOK' LIMIT 200",
    "gold_sql": "SELECT count(*) FROM stops WHERE planning_area = 'BEDOK'",
    "row_count": 1,
    "gold_row_count": 1,
    "correct": true,
-   "latency_ms": 7781.2,
+   "latency_ms": 6982.6,
    "model_calls": 1,
    "attempts": [
     {
@@ -1621,12 +1620,12 @@
    "status": "answered",
    "reason": null,
    "detail": null,
-   "sql": "SELECT COUNT(*) FROM stops WHERE planning_area = 'JURONG WEST' LIMIT 201",
+   "sql": "SELECT COUNT(*) FROM stops WHERE planning_area = 'JURONG WEST' LIMIT 200",
    "gold_sql": "SELECT count(*) FROM stops WHERE planning_area = 'JURONG WEST'",
    "row_count": 1,
    "gold_row_count": 1,
    "correct": true,
-   "latency_ms": 9741.6,
+   "latency_ms": 7159.0,
    "model_calls": 1,
    "attempts": [
     {
@@ -1645,17 +1644,17 @@
    "status": "answered",
    "reason": null,
    "detail": null,
-   "sql": "SELECT s.region, COUNT(*) AS stop_count FROM stops AS s WHERE NOT planning_area IS NULL GROUP BY s.region ORDER BY s.region LIMIT 201",
+   "sql": "SELECT region, COUNT(*) AS n_stops FROM stops WHERE NOT planning_area IS NULL GROUP BY region ORDER BY n_stops DESC LIMIT 200",
    "gold_sql": "SELECT region, count(*) FROM stops WHERE region IS NOT NULL GROUP BY region",
    "row_count": 5,
    "gold_row_count": 5,
    "correct": true,
-   "latency_ms": 11475.1,
+   "latency_ms": 9098.3,
    "model_calls": 1,
    "attempts": [
     {
      "engine": "llm",
-     "sql": "SELECT s.region, COUNT(*) AS stop_count FROM stops s WHERE planning_area IS NOT NULL GROUP BY s.region ORDER BY s.region"
+     "sql": "SELECT region, count(*) AS n_stops FROM stops WHERE planning_area IS NOT NULL GROUP BY region ORDER BY n_stops DESC"
     }
    ]
   },
@@ -1669,12 +1668,12 @@
    "status": "answered",
    "reason": null,
    "detail": null,
-   "sql": "SELECT s.planning_area, COUNT(*) AS n_stops FROM stops AS s JOIN planning_areas AS pa ON s.planning_area = pa.planning_area WHERE pa.region = 'NORTH REGION' GROUP BY s.planning_area LIMIT 201",
+   "sql": "SELECT s.planning_area, COUNT(*) AS n_stops FROM stops AS s JOIN planning_areas AS pa ON s.planning_area = pa.planning_area WHERE pa.region = 'NORTH REGION' GROUP BY s.planning_area LIMIT 200",
    "gold_sql": "SELECT planning_area, count(*) FROM stops WHERE region = 'NORTH REGION' GROUP BY planning_area",
    "row_count": 7,
    "gold_row_count": 7,
    "correct": true,
-   "latency_ms": 14868.7,
+   "latency_ms": 14599.6,
    "model_calls": 1,
    "attempts": [
     {
@@ -1693,12 +1692,12 @@
    "status": "answered",
    "reason": null,
    "detail": null,
-   "sql": "SELECT weekday_boardings FROM stops WHERE stop_code = '01012' LIMIT 201",
+   "sql": "SELECT weekday_boardings FROM stops WHERE stop_code = '01012' LIMIT 200",
    "gold_sql": "SELECT weekday_boardings FROM stops WHERE stop_code = '01012'",
    "row_count": 1,
    "gold_row_count": 1,
    "correct": true,
-   "latency_ms": 9755.2,
+   "latency_ms": 9482.9,
    "model_calls": 1,
    "attempts": [
     {
@@ -1717,17 +1716,17 @@
    "status": "answered",
    "reason": null,
    "detail": null,
-   "sql": "SELECT weekday_boardings FROM stops WHERE stop_code IN ('22009') AND stop_name = 'Boon Lay Int' LIMIT 201",
+   "sql": "SELECT weekday_boardings FROM stops WHERE stop_name = 'Boon Lay Int' AND planning_area = 'BOON LAY' LIMIT 200",
    "gold_sql": "SELECT weekday_boardings FROM stops WHERE stop_name = 'Boon Lay Int'",
-   "row_count": 1,
+   "row_count": 0,
    "gold_row_count": 1,
-   "correct": true,
-   "latency_ms": 11348.1,
+   "correct": false,
+   "latency_ms": 9116.7,
    "model_calls": 1,
    "attempts": [
     {
      "engine": "llm",
-     "sql": "SELECT weekday_boardings FROM stops WHERE stop_code IN ('22009') AND stop_name = 'Boon Lay Int'"
+     "sql": "SELECT weekday_boardings FROM stops WHERE stop_name = 'Boon Lay Int' AND planning_area = 'BOON LAY'"
     }
    ]
   },
@@ -1741,12 +1740,12 @@
    "status": "answered",
    "reason": null,
    "detail": null,
-   "sql": "SELECT DISTINCT s.service_no, s.direction, s.operator, s.category FROM services AS s JOIN route_stops AS rs ON s.service_no = rs.service_no AND s.direction = rs.direction WHERE rs.stop_code = '08057' LIMIT 201",
+   "sql": "SELECT DISTINCT s.service_no, s.direction, s.operator, s.category FROM services AS s JOIN route_stops AS rs ON s.service_no = rs.service_no AND s.direction = rs.direction WHERE rs.stop_code = '08057' LIMIT 200",
    "gold_sql": "SELECT DISTINCT service_no FROM route_stops WHERE stop_code = '08057'",
    "row_count": 33,
    "gold_row_count": 33,
    "correct": true,
-   "latency_ms": 14561.9,
+   "latency_ms": 12051.5,
    "model_calls": 1,
    "attempts": [
     {
@@ -1765,17 +1764,17 @@
    "status": "answered",
    "reason": null,
    "detail": null,
-   "sql": "SELECT DISTINCT s.service_no, s.direction, s.operator, s.category FROM services AS s JOIN route_stops AS rs ON s.service_no = rs.service_no AND s.direction = rs.direction WHERE rs.stop_code = '75009' LIMIT 201",
+   "sql": "SELECT DISTINCT s.service_no, s.direction, s.operator, s.category FROM services AS s JOIN route_stops AS rs ON s.service_no = rs.service_no AND s.direction = rs.direction AND rs.stop_code = '75009' LIMIT 200",
    "gold_sql": "SELECT DISTINCT service_no FROM route_stops WHERE stop_code = '75009'",
    "row_count": 42,
    "gold_row_count": 32,
    "correct": false,
-   "latency_ms": 9833.8,
+   "latency_ms": 12684.8,
    "model_calls": 1,
    "attempts": [
     {
      "engine": "llm",
-     "sql": "SELECT DISTINCT s.service_no, s.direction, s.operator, s.category FROM services s JOIN route_stops rs ON s.service_no = rs.service_no AND s.direction = rs.direction WHERE rs.stop_code = '75009'"
+     "sql": "SELECT DISTINCT s.service_no, s.direction, s.operator, s.category FROM services s JOIN route_stops rs ON s.service_no = rs.service_no AND s.direction = rs.direction AND rs.stop_code = '75009'"
     }
    ]
   },
@@ -1789,12 +1788,12 @@
    "status": "answered",
    "reason": null,
    "detail": null,
-   "sql": "SELECT n_stops FROM services WHERE service_no = '190' AND direction = 1 LIMIT 201",
+   "sql": "SELECT n_stops FROM services WHERE service_no = '190' AND direction = 1 LIMIT 200",
    "gold_sql": "SELECT n_stops FROM services WHERE service_no = '190' AND direction = 1",
    "row_count": 1,
    "gold_row_count": 1,
    "correct": true,
-   "latency_ms": 6968.0,
+   "latency_ms": 8039.3,
    "model_calls": 1,
    "attempts": [
     {
@@ -1813,12 +1812,12 @@
    "status": "answered",
    "reason": null,
    "detail": null,
-   "sql": "SELECT route_km FROM services WHERE service_no = '858' LIMIT 201",
+   "sql": "SELECT route_km FROM services WHERE service_no = '858' LIMIT 200",
    "gold_sql": "SELECT route_km FROM services WHERE service_no = '858'",
    "row_count": 1,
    "gold_row_count": 1,
    "correct": true,
-   "latency_ms": 6331.6,
+   "latency_ms": 7428.3,
    "model_calls": 1,
    "attempts": [
     {
@@ -1837,12 +1836,12 @@
    "status": "answered",
    "reason": null,
    "detail": null,
-   "sql": "SELECT b.stop_code, b.stop_name FROM stops AS a JOIN stops AS b ON b.stop_code <> a.stop_code WHERE a.stop_code = '08057' AND SQRT(POWER(a.x_m - b.x_m, 2) + POWER(a.y_m - b.y_m, 2)) <= 300 LIMIT 201",
+   "sql": "SELECT b.stop_code, b.stop_name FROM stops AS a JOIN stops AS b ON b.stop_code <> a.stop_code WHERE a.stop_code = '08057' AND SQRT(POWER(a.x_m - b.x_m, 2) + POWER(a.y_m - b.y_m, 2)) <= 300 LIMIT 200",
    "gold_sql": "SELECT b.stop_code FROM stops a JOIN stops b ON b.stop_code <> a.stop_code WHERE a.stop_code = '08057' AND sqrt(power(a.x_m - b.x_m, 2) + power(a.y_m - b.y_m, 2)) <= 300",
    "row_count": 2,
    "gold_row_count": 2,
    "correct": true,
-   "latency_ms": 15805.9,
+   "latency_ms": 17145.8,
    "model_calls": 1,
    "attempts": [
     {
@@ -1866,7 +1865,7 @@
    "row_count": 0,
    "gold_row_count": 1,
    "correct": false,
-   "latency_ms": 32553.0,
+   "latency_ms": 34438.8,
    "model_calls": 2,
    "attempts": [
     {
@@ -1896,7 +1895,7 @@
    "row_count": 5,
    "gold_row_count": 5,
    "correct": true,
-   "latency_ms": 14407.9,
+   "latency_ms": 10937.8,
    "model_calls": 1,
    "attempts": [
     {
@@ -1915,12 +1914,12 @@
    "status": "answered",
    "reason": null,
    "detail": null,
-   "sql": "SELECT planning_area FROM planning_areas WHERE coverage_straight_400m > 0.99 LIMIT 201",
+   "sql": "SELECT planning_area FROM planning_areas WHERE coverage_straight_400m > 0.99 LIMIT 200",
    "gold_sql": "SELECT planning_area FROM planning_areas WHERE coverage_straight_400m > 0.99",
    "row_count": 25,
    "gold_row_count": 25,
    "correct": true,
-   "latency_ms": 11003.0,
+   "latency_ms": 7990.0,
    "model_calls": 1,
    "attempts": [
     {
@@ -1939,12 +1938,12 @@
    "status": "answered",
    "reason": null,
    "detail": null,
-   "sql": "SELECT subzone, coverage_walk_400m FROM subzones WHERE planning_area = 'BUKIT TIMAH' AND coverage_walk_400m < 0.5 LIMIT 201",
+   "sql": "SELECT subzone, coverage_walk_400m FROM subzones WHERE planning_area = 'BUKIT TIMAH' AND coverage_walk_400m < 0.5 LIMIT 200",
    "gold_sql": "SELECT subzone FROM subzones WHERE planning_area = 'BUKIT TIMAH' AND coverage_walk_400m < 0.5",
    "row_count": 6,
    "gold_row_count": 6,
    "correct": true,
-   "latency_ms": 16208.8,
+   "latency_ms": 10416.4,
    "model_calls": 1,
    "attempts": [
     {
@@ -1963,12 +1962,12 @@
    "status": "answered",
    "reason": null,
    "detail": null,
-   "sql": "SELECT subzone FROM subzones WHERE residents >= 1000 AND coverage_walk_400m < 0.4 LIMIT 201",
+   "sql": "SELECT subzone FROM subzones WHERE residents >= 1000 AND coverage_walk_400m < 0.4 LIMIT 200",
    "gold_sql": "SELECT subzone FROM subzones WHERE residents >= 1000 AND coverage_walk_400m < 0.4",
    "row_count": 28,
    "gold_row_count": 28,
    "correct": true,
-   "latency_ms": 12867.8,
+   "latency_ms": 9371.4,
    "model_calls": 1,
    "attempts": [
     {
@@ -1992,7 +1991,7 @@
    "row_count": 5,
    "gold_row_count": 5,
    "correct": true,
-   "latency_ms": 16453.5,
+   "latency_ms": 11410.1,
    "model_calls": 1,
    "attempts": [
     {
@@ -2016,7 +2015,7 @@
    "row_count": 3,
    "gold_row_count": 3,
    "correct": true,
-   "latency_ms": 15711.1,
+   "latency_ms": 12255.7,
    "model_calls": 1,
    "attempts": [
     {
@@ -2040,7 +2039,7 @@
    "row_count": 5,
    "gold_row_count": 5,
    "correct": true,
-   "latency_ms": 8744.4,
+   "latency_ms": 8313.8,
    "model_calls": 1,
    "attempts": [
     {
@@ -2064,7 +2063,7 @@
    "row_count": 1,
    "gold_row_count": 1,
    "correct": true,
-   "latency_ms": 9214.2,
+   "latency_ms": 8790.1,
    "model_calls": 1,
    "attempts": [
     {
@@ -2083,12 +2082,12 @@
    "status": "answered",
    "reason": null,
    "detail": null,
-   "sql": "SELECT weekday_trips FROM od_area_flows WHERE origin_area = 'TAMPINES' AND destination_area = 'BEDOK' LIMIT 201",
+   "sql": "SELECT weekday_trips FROM od_area_flows WHERE origin_area = 'TAMPINES' AND destination_area = 'BEDOK' LIMIT 200",
    "gold_sql": "SELECT weekday_trips FROM od_area_flows WHERE origin_area = 'TAMPINES' AND destination_area = 'BEDOK'",
    "row_count": 1,
    "gold_row_count": 1,
    "correct": true,
-   "latency_ms": 10248.7,
+   "latency_ms": 9249.9,
    "model_calls": 1,
    "attempts": [
     {
@@ -2107,12 +2106,12 @@
    "status": "answered",
    "reason": null,
    "detail": null,
-   "sql": "SELECT weekday_trips FROM od_area_flows WHERE origin_area = 'WOODLANDS' AND destination_area = 'YISHUN' LIMIT 201",
+   "sql": "SELECT weekday_trips FROM od_area_flows WHERE origin_area = 'WOODLANDS' AND destination_area = 'YISHUN' LIMIT 200",
    "gold_sql": "SELECT weekday_trips FROM od_area_flows WHERE origin_area = 'WOODLANDS' AND destination_area = 'YISHUN'",
    "row_count": 1,
    "gold_row_count": 1,
    "correct": true,
-   "latency_ms": 10382.6,
+   "latency_ms": 9659.3,
    "model_calls": 1,
    "attempts": [
     {
@@ -2136,7 +2135,7 @@
    "row_count": 1,
    "gold_row_count": 1,
    "correct": false,
-   "latency_ms": 8704.6,
+   "latency_ms": 8694.5,
    "model_calls": 1,
    "attempts": [
     {
@@ -2160,7 +2159,7 @@
    "row_count": 1,
    "gold_row_count": 1,
    "correct": true,
-   "latency_ms": 11197.0,
+   "latency_ms": 10472.5,
    "model_calls": 1,
    "attempts": [
     {
@@ -2184,7 +2183,7 @@
    "row_count": 4,
    "gold_row_count": 4,
    "correct": true,
-   "latency_ms": 8588.6,
+   "latency_ms": 7691.2,
    "model_calls": 1,
    "attempts": [
     {
@@ -2203,12 +2202,12 @@
    "status": "answered",
    "reason": null,
    "detail": null,
-   "sql": "SELECT from_stop, to_stop, am_peak_buses_per_hour FROM corridor_links WHERE am_peak_buses_per_hour > 150 LIMIT 201",
+   "sql": "SELECT from_stop, to_stop, am_peak_buses_per_hour FROM corridor_links WHERE am_peak_buses_per_hour > 150 LIMIT 200",
    "gold_sql": "SELECT from_stop, to_stop FROM corridor_links WHERE am_peak_buses_per_hour > 150",
    "row_count": 1,
    "gold_row_count": 1,
    "correct": true,
-   "latency_ms": 11417.3,
+   "latency_ms": 9269.0,
    "model_calls": 1,
    "attempts": [
     {
@@ -2227,12 +2226,12 @@
    "status": "answered",
    "reason": null,
    "detail": null,
-   "sql": "SELECT s.stop_code, s.stop_name, sc.baseline_weekday_boardings, sc.aug_weekday_boardings, sc.pct_change FROM stop_changes AS sc JOIN stops AS s ON sc.stop_code = s.stop_code WHERE sc.flag = 'drop' LIMIT 201",
+   "sql": "SELECT s.stop_code, s.stop_name, sc.baseline_weekday_boardings, sc.aug_weekday_boardings, sc.pct_change FROM stop_changes AS sc JOIN stops AS s ON sc.stop_code = s.stop_code WHERE sc.flag = 'drop' LIMIT 200",
    "gold_sql": "SELECT stop_code FROM stop_changes WHERE flag = 'drop'",
    "row_count": 4,
    "gold_row_count": 4,
    "correct": true,
-   "latency_ms": 24822.4,
+   "latency_ms": 20841.6,
    "model_calls": 2,
    "attempts": [
     {
@@ -2256,12 +2255,12 @@
    "status": "answered",
    "reason": null,
    "detail": null,
-   "sql": "SELECT COUNT(*) FROM stop_changes WHERE flag = 'surge' LIMIT 201",
+   "sql": "SELECT COUNT(*) FROM stop_changes WHERE flag = 'surge' LIMIT 200",
    "gold_sql": "SELECT count(*) FROM stop_changes WHERE flag = 'surge'",
    "row_count": 1,
    "gold_row_count": 1,
    "correct": true,
-   "latency_ms": 9108.4,
+   "latency_ms": 7266.6,
    "model_calls": 1,
    "attempts": [
     {
@@ -2280,12 +2279,12 @@
    "status": "answered",
    "reason": null,
    "detail": null,
-   "sql": "SELECT operator, COUNT(DISTINCT service_no) AS n_services FROM services GROUP BY operator ORDER BY n_services DESC LIMIT 201",
+   "sql": "SELECT operator, COUNT(DISTINCT service_no) AS n_services FROM services GROUP BY operator ORDER BY n_services DESC LIMIT 200",
    "gold_sql": "SELECT operator, count(DISTINCT service_no) FROM services GROUP BY operator",
    "row_count": 4,
    "gold_row_count": 4,
    "correct": true,
-   "latency_ms": 9379.6,
+   "latency_ms": 8496.9,
    "model_calls": 1,
    "attempts": [
     {
@@ -2304,12 +2303,12 @@
    "status": "answered",
    "reason": null,
    "detail": null,
-   "sql": "SELECT COUNT(DISTINCT service_no) FROM services WHERE category = 'EXPRESS' LIMIT 201",
+   "sql": "SELECT COUNT(DISTINCT service_no) FROM services WHERE category = 'EXPRESS' LIMIT 200",
    "gold_sql": "SELECT count(DISTINCT service_no) FROM services WHERE category = 'EXPRESS'",
    "row_count": 1,
    "gold_row_count": 1,
    "correct": true,
-   "latency_ms": 7477.7,
+   "latency_ms": 7883.5,
    "model_calls": 1,
    "attempts": [
     {
@@ -2333,7 +2332,7 @@
    "row_count": 1,
    "gold_row_count": 1,
    "correct": true,
-   "latency_ms": 8123.6,
+   "latency_ms": 8919.8,
    "model_calls": 1,
    "attempts": [
     {
@@ -2352,12 +2351,12 @@
    "status": "answered",
    "reason": null,
    "detail": null,
-   "sql": "SELECT COUNT(*) FROM stops WHERE n_services = 1 LIMIT 201",
+   "sql": "SELECT COUNT(*) FROM stops WHERE n_services = 1 LIMIT 200",
    "gold_sql": "SELECT count(*) FROM stops WHERE n_services = 1",
    "row_count": 1,
    "gold_row_count": 1,
    "correct": true,
-   "latency_ms": 6537.2,
+   "latency_ms": 6896.8,
    "model_calls": 1,
    "attempts": [
     {
@@ -2381,7 +2380,7 @@
    "row_count": 1,
    "gold_row_count": 1,
    "correct": true,
-   "latency_ms": 10762.6,
+   "latency_ms": 10503.8,
    "model_calls": 1,
    "attempts": [
     {
@@ -2400,12 +2399,12 @@
    "status": "answered",
    "reason": null,
    "detail": null,
-   "sql": "SELECT residents_outside_walk_400m FROM planning_areas WHERE planning_area = 'TANGLIN' LIMIT 201",
+   "sql": "SELECT residents_outside_walk_400m FROM planning_areas WHERE planning_area = 'TANGLIN' LIMIT 200",
    "gold_sql": "SELECT residents_outside_walk_400m FROM planning_areas WHERE planning_area = 'TANGLIN'",
    "row_count": 1,
    "gold_row_count": 1,
    "correct": true,
-   "latency_ms": 8136.3,
+   "latency_ms": 8715.5,
    "model_calls": 1,
    "attempts": [
     {
@@ -2424,12 +2423,12 @@
    "status": "answered",
    "reason": null,
    "detail": null,
-   "sql": "SELECT planning_area FROM planning_areas WHERE residents >= 10000 AND stops_per_10k_residents < 8 LIMIT 201",
+   "sql": "SELECT planning_area FROM planning_areas WHERE residents >= 10000 AND stops_per_10k_residents < 8 LIMIT 200",
    "gold_sql": "SELECT planning_area FROM planning_areas WHERE residents >= 10000 AND stops_per_10k_residents < 8",
    "row_count": 5,
    "gold_row_count": 5,
    "correct": true,
-   "latency_ms": 10893.3,
+   "latency_ms": 9010.9,
    "model_calls": 1,
    "attempts": [
     {
@@ -2453,7 +2452,7 @@
    "row_count": 0,
    "gold_row_count": 1,
    "correct": false,
-   "latency_ms": 41791.9,
+   "latency_ms": 33494.2,
    "model_calls": 2,
    "attempts": [
     {
@@ -2478,12 +2477,12 @@
    "status": "answered",
    "reason": null,
    "detail": null,
-   "sql": "SELECT DISTINCT service_no FROM services WHERE NOT am_peak_headway_min IS NULL AND am_peak_headway_min >= 20 LIMIT 201",
+   "sql": "SELECT DISTINCT service_no FROM services WHERE NOT am_peak_headway_min IS NULL AND am_peak_headway_min >= 20 LIMIT 200",
    "gold_sql": "SELECT DISTINCT service_no FROM services WHERE am_peak_headway_min >= 20",
    "row_count": 53,
    "gold_row_count": 53,
    "correct": true,
-   "latency_ms": 9407.8,
+   "latency_ms": 8442.9,
    "model_calls": 1,
    "attempts": [
     {
@@ -2502,12 +2501,12 @@
    "status": "answered",
    "reason": null,
    "detail": null,
-   "sql": "SELECT AVG(am_peak_headway_min) AS avg_am_peak_headway FROM services WHERE category = 'FEEDER' AND NOT am_peak_headway_min IS NULL LIMIT 201",
+   "sql": "SELECT AVG(am_peak_headway_min) AS avg_am_peak_headway FROM services WHERE category = 'FEEDER' AND NOT am_peak_headway_min IS NULL LIMIT 200",
    "gold_sql": "SELECT avg(am_peak_headway_min) FROM services WHERE category = 'FEEDER'",
    "row_count": 1,
    "gold_row_count": 1,
    "correct": true,
-   "latency_ms": 10861.4,
+   "latency_ms": 9572.7,
    "model_calls": 1,
    "attempts": [
     {
@@ -2526,17 +2525,17 @@
    "status": "answered",
    "reason": null,
    "detail": null,
-   "sql": "SELECT stop_code, stop_name, weekday_boardings, pm_peak_share FROM stops WHERE planning_area = 'QUEENSTOWN' AND pm_peak_share > 0.6 LIMIT 201",
+   "sql": "SELECT stop_code, stop_name, pm_peak_share FROM stops WHERE planning_area = 'QUEENSTOWN' AND pm_peak_share > 0.6 LIMIT 200",
    "gold_sql": "SELECT stop_code FROM stops WHERE planning_area = 'QUEENSTOWN' AND pm_peak_share > 0.6",
    "row_count": 12,
    "gold_row_count": 12,
    "correct": true,
-   "latency_ms": 10704.5,
+   "latency_ms": 9987.4,
    "model_calls": 1,
    "attempts": [
     {
      "engine": "llm",
-     "sql": "SELECT stop_code, stop_name, weekday_boardings, pm_peak_share FROM stops WHERE planning_area = 'QUEENSTOWN' AND pm_peak_share > 0.6"
+     "sql": "SELECT stop_code, stop_name, pm_peak_share FROM stops WHERE planning_area = 'QUEENSTOWN' AND pm_peak_share > 0.6"
     }
    ]
   },
@@ -2550,12 +2549,12 @@
    "status": "answered",
    "reason": null,
    "detail": null,
-   "sql": "SELECT stop_code, stop_name, peak_hour FROM stops WHERE planning_area = 'CLEMENTI' AND peak_hour = 8 LIMIT 201",
+   "sql": "SELECT stop_code, stop_name, peak_hour FROM stops WHERE planning_area = 'CLEMENTI' AND peak_hour = 8 LIMIT 200",
    "gold_sql": "SELECT stop_code FROM stops WHERE planning_area = 'CLEMENTI' AND peak_hour = 8",
    "row_count": 26,
    "gold_row_count": 26,
    "correct": true,
-   "latency_ms": 8780.6,
+   "latency_ms": 8768.9,
    "model_calls": 1,
    "attempts": [
     {
@@ -2574,12 +2573,12 @@
    "status": "answered",
    "reason": null,
    "detail": null,
-   "sql": "SELECT SUM(weekday_boardings) AS total_weekday_boardings FROM stops WHERE region = 'CENTRAL REGION' AND NOT weekday_boardings IS NULL LIMIT 201",
+   "sql": "SELECT SUM(weekday_boardings) AS total_weekday_boardings FROM stops WHERE region = 'CENTRAL REGION' AND NOT weekday_boardings IS NULL LIMIT 200",
    "gold_sql": "SELECT sum(weekday_boardings) FROM stops WHERE region = 'CENTRAL REGION'",
    "row_count": 1,
    "gold_row_count": 1,
    "correct": true,
-   "latency_ms": 9357.1,
+   "latency_ms": 9104.6,
    "model_calls": 1,
    "attempts": [
     {
@@ -2598,12 +2597,12 @@
    "status": "answered",
    "reason": null,
    "detail": null,
-   "sql": "SELECT AVG(weekday_boardings) AS avg_weekday_boardings FROM stops WHERE planning_area = 'PUNGGOL' AND NOT weekday_boardings IS NULL LIMIT 201",
+   "sql": "SELECT AVG(weekday_boardings) AS avg_weekday_boardings FROM stops WHERE planning_area = 'PUNGGOL' AND NOT weekday_boardings IS NULL LIMIT 200",
    "gold_sql": "SELECT avg(weekday_boardings) FROM stops WHERE planning_area = 'PUNGGOL'",
    "row_count": 1,
    "gold_row_count": 1,
    "correct": true,
-   "latency_ms": 10478.0,
+   "latency_ms": 10455.7,
    "model_calls": 1,
    "attempts": [
     {
@@ -2622,12 +2621,12 @@
    "status": "answered",
    "reason": null,
    "detail": null,
-   "sql": "SELECT COUNT(*) FROM stops WHERE road_name = 'Orchard Rd' LIMIT 201",
+   "sql": "SELECT COUNT(*) FROM stops WHERE road_name = 'Orchard Rd' LIMIT 200",
    "gold_sql": "SELECT count(*) FROM stops WHERE road_name = 'Orchard Rd'",
    "row_count": 1,
    "gold_row_count": 1,
    "correct": true,
-   "latency_ms": 7298.1,
+   "latency_ms": 7287.4,
    "model_calls": 1,
    "attempts": [
     {
@@ -2646,12 +2645,12 @@
    "status": "answered",
    "reason": null,
    "detail": null,
-   "sql": "SELECT stop_code, stop_name, weekday_boardings FROM stops WHERE road_name = 'CLEMENTI RD' AND weekday_boardings > 2000 LIMIT 201",
+   "sql": "SELECT stop_code, stop_name, weekday_boardings FROM stops WHERE road_name = 'CLEMENTI RD' AND weekday_boardings > 2000 LIMIT 200",
    "gold_sql": "SELECT stop_code FROM stops WHERE road_name = 'Clementi Rd' AND weekday_boardings > 2000",
    "row_count": 0,
    "gold_row_count": 3,
    "correct": false,
-   "latency_ms": 10503.5,
+   "latency_ms": 9517.5,
    "model_calls": 1,
    "attempts": [
     {
@@ -2670,12 +2669,12 @@
    "status": "answered",
    "reason": null,
    "detail": null,
-   "sql": "SELECT origin_stop, destination_stop FROM services WHERE service_no = '96' AND direction = 1 LIMIT 201",
+   "sql": "SELECT origin_stop, destination_stop FROM services WHERE service_no = '96' AND direction = 1 LIMIT 200",
    "gold_sql": "SELECT origin_stop, destination_stop FROM services WHERE service_no = '96' AND direction = 1",
    "row_count": 1,
    "gold_row_count": 1,
    "correct": true,
-   "latency_ms": 10765.8,
+   "latency_ms": 7984.5,
    "model_calls": 1,
    "attempts": [
     {
@@ -2694,12 +2693,12 @@
    "status": "answered",
    "reason": null,
    "detail": null,
-   "sql": "SELECT s.planning_area FROM stops AS s WHERE s.stop_code = '46009' LIMIT 201",
+   "sql": "SELECT s.planning_area FROM stops AS s WHERE s.stop_code = '46009' LIMIT 200",
    "gold_sql": "SELECT planning_area FROM stops WHERE stop_code = '46009'",
    "row_count": 1,
    "gold_row_count": 1,
    "correct": true,
-   "latency_ms": 10688.6,
+   "latency_ms": 8086.3,
    "model_calls": 1,
    "attempts": [
     {
@@ -2718,17 +2717,17 @@
    "status": "answered",
    "reason": null,
    "detail": null,
-   "sql": "SELECT s.subzone, s.n_stops FROM subzones AS s JOIN planning_areas AS p ON s.planning_area = p.planning_area WHERE p.planning_area = 'TOA PAYOH' ORDER BY n_stops DESC LIMIT 1",
+   "sql": "SELECT s.subzone, s.n_stops FROM subzones AS s WHERE s.planning_area = 'TOA PAYOH' ORDER BY n_stops DESC LIMIT 1",
    "gold_sql": "SELECT subzone FROM subzones WHERE planning_area = 'TOA PAYOH' ORDER BY n_stops DESC LIMIT 1",
    "row_count": 1,
    "gold_row_count": 1,
    "correct": true,
-   "latency_ms": 16691.7,
+   "latency_ms": 9988.7,
    "model_calls": 1,
    "attempts": [
     {
      "engine": "llm",
-     "sql": "SELECT s.subzone, s.n_stops FROM subzones s JOIN planning_areas p ON s.planning_area = p.planning_area WHERE p.planning_area = 'TOA PAYOH' ORDER BY n_stops DESC LIMIT 1"
+     "sql": "SELECT s.subzone, s.n_stops FROM subzones s WHERE s.planning_area = 'TOA PAYOH' ORDER BY n_stops DESC LIMIT 1"
     }
    ]
   },
@@ -2742,12 +2741,12 @@
    "status": "answered",
    "reason": null,
    "detail": null,
-   "sql": "SELECT weekday_trips FROM od_area_flows WHERE origin_area = 'JURONG EAST' AND destination_area = 'CLEMENTI' LIMIT 201",
+   "sql": "SELECT weekday_trips FROM od_area_flows WHERE origin_area = 'JURONG EAST' AND destination_area = 'CLEMENTI' LIMIT 200",
    "gold_sql": "SELECT weekday_trips FROM od_area_flows WHERE origin_area = 'JURONG EAST' AND destination_area = 'CLEMENTI'",
    "row_count": 1,
    "gold_row_count": 1,
    "correct": true,
-   "latency_ms": 12231.2,
+   "latency_ms": 8901.9,
    "model_calls": 1,
    "attempts": [
     {
@@ -2766,12 +2765,12 @@
    "status": "answered",
    "reason": null,
    "detail": null,
-   "sql": "SELECT SUM(link_km) AS combined_length_km FROM corridor_links WHERE n_services >= 10 LIMIT 201",
+   "sql": "SELECT SUM(link_km) AS combined_length_km FROM corridor_links WHERE n_services >= 10 LIMIT 200",
    "gold_sql": "SELECT sum(link_km) FROM corridor_links WHERE n_services >= 10",
    "row_count": 1,
    "gold_row_count": 1,
    "correct": true,
-   "latency_ms": 10329.4,
+   "latency_ms": 8019.1,
    "model_calls": 1,
    "attempts": [
     {
@@ -2790,12 +2789,12 @@
    "status": "answered",
    "reason": null,
    "detail": null,
-   "sql": "SELECT subzone FROM subzones WHERE residents > 1000 AND n_stops = 0 LIMIT 201",
+   "sql": "SELECT subzone FROM subzones WHERE residents > 1000 AND n_stops = 0 LIMIT 200",
    "gold_sql": "SELECT subzone FROM subzones WHERE residents > 1000 AND n_stops = 0",
    "row_count": 3,
    "gold_row_count": 3,
    "correct": true,
-   "latency_ms": 11883.4,
+   "latency_ms": 8462.5,
    "model_calls": 1,
    "attempts": [
     {
@@ -2933,12 +2932,12 @@
    "row_count": 0,
    "gold_row_count": null,
    "correct": false,
-   "latency_ms": 6323.4,
+   "latency_ms": 4953.7,
    "model_calls": 1,
    "attempts": [
     {
      "engine": "llm",
-     "reply": "```sql\nSELECT CANNOT_ANSWER\n```",
+     "reply": "CANNOT_ANSWER",
      "error": "model declined"
     }
    ]
@@ -2958,7 +2957,7 @@
    "row_count": 0,
    "gold_row_count": null,
    "correct": false,
-   "latency_ms": 6155.0,
+   "latency_ms": 5767.3,
    "model_calls": 1,
    "attempts": [
     {
@@ -3021,7 +3020,7 @@
    "row_count": 0,
    "gold_row_count": null,
    "correct": false,
-   "latency_ms": 6089.6,
+   "latency_ms": 6255.0,
    "model_calls": 1,
    "attempts": [
     {
@@ -3122,12 +3121,12 @@
    "row_count": 0,
    "gold_row_count": null,
    "correct": false,
-   "latency_ms": 6699.1,
+   "latency_ms": 5263.4,
    "model_calls": 1,
    "attempts": [
     {
      "engine": "llm",
-     "reply": "```sql\nSELECT CANNOT_ANSWER\n```",
+     "reply": "CANNOT_ANSWER",
      "error": "model declined"
     }
    ]
@@ -3147,7 +3146,7 @@
    "row_count": 10,
    "gold_row_count": 10,
    "correct": true,
-   "latency_ms": 54953.3,
+   "latency_ms": 45736.9,
    "model_calls": 1,
    "attempts": [
     {
@@ -3171,7 +3170,7 @@
    "row_count": 5,
    "gold_row_count": 5,
    "correct": true,
-   "latency_ms": 16350.9,
+   "latency_ms": 11682.0,
    "model_calls": 1,
    "attempts": [
     {
@@ -3190,12 +3189,12 @@
    "status": "answered",
    "reason": null,
    "detail": null,
-   "sql": "SELECT COUNT(*) FROM stops WHERE planning_area = 'BEDOK' LIMIT 201",
+   "sql": "SELECT COUNT(*) FROM stops WHERE planning_area = 'BEDOK' LIMIT 200",
    "gold_sql": "SELECT count(*) FROM stops WHERE planning_area = 'BEDOK'",
    "row_count": 1,
    "gold_row_count": 1,
    "correct": true,
-   "latency_ms": 7781.2,
+   "latency_ms": 6982.6,
    "model_calls": 1,
    "attempts": [
     {
@@ -3214,12 +3213,12 @@
    "status": "answered",
    "reason": null,
    "detail": null,
-   "sql": "SELECT COUNT(*) FROM stops WHERE planning_area = 'JURONG WEST' LIMIT 201",
+   "sql": "SELECT COUNT(*) FROM stops WHERE planning_area = 'JURONG WEST' LIMIT 200",
    "gold_sql": "SELECT count(*) FROM stops WHERE planning_area = 'JURONG WEST'",
    "row_count": 1,
    "gold_row_count": 1,
    "correct": true,
-   "latency_ms": 9741.6,
+   "latency_ms": 7159.0,
    "model_calls": 1,
    "attempts": [
     {
@@ -3238,17 +3237,17 @@
    "status": "answered",
    "reason": null,
    "detail": null,
-   "sql": "SELECT s.region, COUNT(*) AS stop_count FROM stops AS s WHERE NOT planning_area IS NULL GROUP BY s.region ORDER BY s.region LIMIT 201",
+   "sql": "SELECT region, COUNT(*) AS n_stops FROM stops WHERE NOT planning_area IS NULL GROUP BY region ORDER BY n_stops DESC LIMIT 200",
    "gold_sql": "SELECT region, count(*) FROM stops WHERE region IS NOT NULL GROUP BY region",
    "row_count": 5,
    "gold_row_count": 5,
    "correct": true,
-   "latency_ms": 11475.1,
+   "latency_ms": 9098.3,
    "model_calls": 1,
    "attempts": [
     {
      "engine": "llm",
-     "sql": "SELECT s.region, COUNT(*) AS stop_count FROM stops s WHERE planning_area IS NOT NULL GROUP BY s.region ORDER BY s.region"
+     "sql": "SELECT region, count(*) AS n_stops FROM stops WHERE planning_area IS NOT NULL GROUP BY region ORDER BY n_stops DESC"
     }
    ]
   },
@@ -3262,12 +3261,12 @@
    "status": "answered",
    "reason": null,
    "detail": null,
-   "sql": "SELECT s.planning_area, COUNT(*) AS n_stops FROM stops AS s JOIN planning_areas AS pa ON s.planning_area = pa.planning_area WHERE pa.region = 'NORTH REGION' GROUP BY s.planning_area LIMIT 201",
+   "sql": "SELECT s.planning_area, COUNT(*) AS n_stops FROM stops AS s JOIN planning_areas AS pa ON s.planning_area = pa.planning_area WHERE pa.region = 'NORTH REGION' GROUP BY s.planning_area LIMIT 200",
    "gold_sql": "SELECT planning_area, count(*) FROM stops WHERE region = 'NORTH REGION' GROUP BY planning_area",
    "row_count": 7,
    "gold_row_count": 7,
    "correct": true,
-   "latency_ms": 14868.7,
+   "latency_ms": 14599.6,
    "model_calls": 1,
    "attempts": [
     {
@@ -3286,12 +3285,12 @@
    "status": "answered",
    "reason": null,
    "detail": null,
-   "sql": "SELECT weekday_boardings FROM stops WHERE stop_code = '01012' LIMIT 201",
+   "sql": "SELECT weekday_boardings FROM stops WHERE stop_code = '01012' LIMIT 200",
    "gold_sql": "SELECT weekday_boardings FROM stops WHERE stop_code = '01012'",
    "row_count": 1,
    "gold_row_count": 1,
    "correct": true,
-   "latency_ms": 9755.2,
+   "latency_ms": 9482.9,
    "model_calls": 1,
    "attempts": [
     {
@@ -3310,17 +3309,17 @@
    "status": "answered",
    "reason": null,
    "detail": null,
-   "sql": "SELECT weekday_boardings FROM stops WHERE stop_code IN ('22009') AND stop_name = 'Boon Lay Int' LIMIT 201",
+   "sql": "SELECT weekday_boardings FROM stops WHERE stop_name = 'Boon Lay Int' AND planning_area = 'BOON LAY' LIMIT 200",
    "gold_sql": "SELECT weekday_boardings FROM stops WHERE stop_name = 'Boon Lay Int'",
-   "row_count": 1,
+   "row_count": 0,
    "gold_row_count": 1,
-   "correct": true,
-   "latency_ms": 11348.1,
+   "correct": false,
+   "latency_ms": 9116.7,
    "model_calls": 1,
    "attempts": [
     {
      "engine": "llm",
-     "sql": "SELECT weekday_boardings FROM stops WHERE stop_code IN ('22009') AND stop_name = 'Boon Lay Int'"
+     "sql": "SELECT weekday_boardings FROM stops WHERE stop_name = 'Boon Lay Int' AND planning_area = 'BOON LAY'"
     }
    ]
   },
@@ -3334,12 +3333,12 @@
    "status": "answered",
    "reason": null,
    "detail": null,
-   "sql": "SELECT DISTINCT s.service_no, s.direction, s.operator, s.category FROM services AS s JOIN route_stops AS rs ON s.service_no = rs.service_no AND s.direction = rs.direction WHERE rs.stop_code = '08057' LIMIT 201",
+   "sql": "SELECT DISTINCT s.service_no, s.direction, s.operator, s.category FROM services AS s JOIN route_stops AS rs ON s.service_no = rs.service_no AND s.direction = rs.direction WHERE rs.stop_code = '08057' LIMIT 200",
    "gold_sql": "SELECT DISTINCT service_no FROM route_stops WHERE stop_code = '08057'",
    "row_count": 33,
    "gold_row_count": 33,
    "correct": true,
-   "latency_ms": 14561.9,
+   "latency_ms": 12051.5,
    "model_calls": 1,
    "attempts": [
     {
@@ -3358,17 +3357,17 @@
    "status": "answered",
    "reason": null,
    "detail": null,
-   "sql": "SELECT DISTINCT s.service_no, s.direction, s.operator, s.category FROM services AS s JOIN route_stops AS rs ON s.service_no = rs.service_no AND s.direction = rs.direction WHERE rs.stop_code = '75009' LIMIT 201",
+   "sql": "SELECT DISTINCT s.service_no, s.direction, s.operator, s.category FROM services AS s JOIN route_stops AS rs ON s.service_no = rs.service_no AND s.direction = rs.direction AND rs.stop_code = '75009' LIMIT 200",
    "gold_sql": "SELECT DISTINCT service_no FROM route_stops WHERE stop_code = '75009'",
    "row_count": 42,
    "gold_row_count": 32,
    "correct": false,
-   "latency_ms": 9833.8,
+   "latency_ms": 12684.8,
    "model_calls": 1,
    "attempts": [
     {
      "engine": "llm",
-     "sql": "SELECT DISTINCT s.service_no, s.direction, s.operator, s.category FROM services s JOIN route_stops rs ON s.service_no = rs.service_no AND s.direction = rs.direction WHERE rs.stop_code = '75009'"
+     "sql": "SELECT DISTINCT s.service_no, s.direction, s.operator, s.category FROM services s JOIN route_stops rs ON s.service_no = rs.service_no AND s.direction = rs.direction AND rs.stop_code = '75009'"
     }
    ]
   },
@@ -3382,12 +3381,12 @@
    "status": "answered",
    "reason": null,
    "detail": null,
-   "sql": "SELECT n_stops FROM services WHERE service_no = '190' AND direction = 1 LIMIT 201",
+   "sql": "SELECT n_stops FROM services WHERE service_no = '190' AND direction = 1 LIMIT 200",
    "gold_sql": "SELECT n_stops FROM services WHERE service_no = '190' AND direction = 1",
    "row_count": 1,
    "gold_row_count": 1,
    "correct": true,
-   "latency_ms": 6968.0,
+   "latency_ms": 8039.3,
    "model_calls": 1,
    "attempts": [
     {
@@ -3406,12 +3405,12 @@
    "status": "answered",
    "reason": null,
    "detail": null,
-   "sql": "SELECT route_km FROM services WHERE service_no = '858' LIMIT 201",
+   "sql": "SELECT route_km FROM services WHERE service_no = '858' LIMIT 200",
    "gold_sql": "SELECT route_km FROM services WHERE service_no = '858'",
    "row_count": 1,
    "gold_row_count": 1,
    "correct": true,
-   "latency_ms": 6331.6,
+   "latency_ms": 7428.3,
    "model_calls": 1,
    "attempts": [
     {
@@ -3430,12 +3429,12 @@
    "status": "answered",
    "reason": null,
    "detail": null,
-   "sql": "SELECT b.stop_code, b.stop_name FROM stops AS a JOIN stops AS b ON b.stop_code <> a.stop_code WHERE a.stop_code = '08057' AND SQRT(POWER(a.x_m - b.x_m, 2) + POWER(a.y_m - b.y_m, 2)) <= 300 LIMIT 201",
+   "sql": "SELECT b.stop_code, b.stop_name FROM stops AS a JOIN stops AS b ON b.stop_code <> a.stop_code WHERE a.stop_code = '08057' AND SQRT(POWER(a.x_m - b.x_m, 2) + POWER(a.y_m - b.y_m, 2)) <= 300 LIMIT 200",
    "gold_sql": "SELECT b.stop_code FROM stops a JOIN stops b ON b.stop_code <> a.stop_code WHERE a.stop_code = '08057' AND sqrt(power(a.x_m - b.x_m, 2) + power(a.y_m - b.y_m, 2)) <= 300",
    "row_count": 2,
    "gold_row_count": 2,
    "correct": true,
-   "latency_ms": 15805.9,
+   "latency_ms": 17145.8,
    "model_calls": 1,
    "attempts": [
     {
@@ -3454,12 +3453,12 @@
    "status": "answered",
    "reason": null,
    "detail": null,
-   "sql": "SELECT b.stop_code, b.stop_name, ROUND(SQRT(POWER(a.x_m - b.x_m, 2) + POWER(a.y_m - b.y_m, 2)), 1) AS distance_m FROM stops AS a JOIN stops AS b ON b.stop_code <> a.stop_code WHERE a.stop_code IN ('16009') AND SQRT(POWER(a.x_m - b.x_m, 2) + POWER(a.y_m - b.y_m, 2)) <= 500 ORDER BY distance_m LIMIT 201",
+   "sql": "SELECT b.stop_code, b.stop_name, ROUND(SQRT(POWER(a.x_m - b.x_m, 2) + POWER(a.y_m - b.y_m, 2)), 1) AS distance_m FROM stops AS a JOIN stops AS b ON b.stop_code <> a.stop_code WHERE a.stop_code IN ('16009') AND SQRT(POWER(a.x_m - b.x_m, 2) + POWER(a.y_m - b.y_m, 2)) <= 500 ORDER BY distance_m LIMIT 200",
    "gold_sql": "SELECT count(*) FROM stops a JOIN stops b ON b.stop_code <> a.stop_code WHERE a.stop_code = '16009' AND sqrt(power(a.x_m - b.x_m, 2) + power(a.y_m - b.y_m, 2)) <= 500",
    "row_count": 20,
    "gold_row_count": 1,
    "correct": false,
-   "latency_ms": 32615.7,
+   "latency_ms": 34516.0,
    "model_calls": 2,
    "attempts": [
     {
@@ -3483,7 +3482,7 @@
    "row_count": 5,
    "gold_row_count": 5,
    "correct": true,
-   "latency_ms": 14407.9,
+   "latency_ms": 10937.8,
    "model_calls": 1,
    "attempts": [
     {
@@ -3502,12 +3501,12 @@
    "status": "answered",
    "reason": null,
    "detail": null,
-   "sql": "SELECT planning_area FROM planning_areas WHERE coverage_straight_400m > 0.99 LIMIT 201",
+   "sql": "SELECT planning_area FROM planning_areas WHERE coverage_straight_400m > 0.99 LIMIT 200",
    "gold_sql": "SELECT planning_area FROM planning_areas WHERE coverage_straight_400m > 0.99",
    "row_count": 25,
    "gold_row_count": 25,
    "correct": true,
-   "latency_ms": 11003.0,
+   "latency_ms": 7990.0,
    "model_calls": 1,
    "attempts": [
     {
@@ -3526,12 +3525,12 @@
    "status": "answered",
    "reason": null,
    "detail": null,
-   "sql": "SELECT subzone, coverage_walk_400m FROM subzones WHERE planning_area = 'BUKIT TIMAH' AND coverage_walk_400m < 0.5 LIMIT 201",
+   "sql": "SELECT subzone, coverage_walk_400m FROM subzones WHERE planning_area = 'BUKIT TIMAH' AND coverage_walk_400m < 0.5 LIMIT 200",
    "gold_sql": "SELECT subzone FROM subzones WHERE planning_area = 'BUKIT TIMAH' AND coverage_walk_400m < 0.5",
    "row_count": 6,
    "gold_row_count": 6,
    "correct": true,
-   "latency_ms": 16208.8,
+   "latency_ms": 10416.4,
    "model_calls": 1,
    "attempts": [
     {
@@ -3550,12 +3549,12 @@
    "status": "answered",
    "reason": null,
    "detail": null,
-   "sql": "SELECT subzone FROM subzones WHERE residents >= 1000 AND coverage_walk_400m < 0.4 LIMIT 201",
+   "sql": "SELECT subzone FROM subzones WHERE residents >= 1000 AND coverage_walk_400m < 0.4 LIMIT 200",
    "gold_sql": "SELECT subzone FROM subzones WHERE residents >= 1000 AND coverage_walk_400m < 0.4",
    "row_count": 28,
    "gold_row_count": 28,
    "correct": true,
-   "latency_ms": 12867.8,
+   "latency_ms": 9371.4,
    "model_calls": 1,
    "attempts": [
     {
@@ -3579,7 +3578,7 @@
    "row_count": 5,
    "gold_row_count": 5,
    "correct": true,
-   "latency_ms": 16453.5,
+   "latency_ms": 11410.1,
    "model_calls": 1,
    "attempts": [
     {
@@ -3603,7 +3602,7 @@
    "row_count": 3,
    "gold_row_count": 3,
    "correct": true,
-   "latency_ms": 15711.1,
+   "latency_ms": 12255.7,
    "model_calls": 1,
    "attempts": [
     {
@@ -3627,7 +3626,7 @@
    "row_count": 5,
    "gold_row_count": 5,
    "correct": true,
-   "latency_ms": 8744.4,
+   "latency_ms": 8313.8,
    "model_calls": 1,
    "attempts": [
     {
@@ -3651,7 +3650,7 @@
    "row_count": 1,
    "gold_row_count": 1,
    "correct": true,
-   "latency_ms": 9214.2,
+   "latency_ms": 8790.1,
    "model_calls": 1,
    "attempts": [
     {
@@ -3670,12 +3669,12 @@
    "status": "answered",
    "reason": null,
    "detail": null,
-   "sql": "SELECT weekday_trips FROM od_area_flows WHERE origin_area = 'TAMPINES' AND destination_area = 'BEDOK' LIMIT 201",
+   "sql": "SELECT weekday_trips FROM od_area_flows WHERE origin_area = 'TAMPINES' AND destination_area = 'BEDOK' LIMIT 200",
    "gold_sql": "SELECT weekday_trips FROM od_area_flows WHERE origin_area = 'TAMPINES' AND destination_area = 'BEDOK'",
    "row_count": 1,
    "gold_row_count": 1,
    "correct": true,
-   "latency_ms": 10248.7,
+   "latency_ms": 9249.9,
    "model_calls": 1,
    "attempts": [
     {
@@ -3694,12 +3693,12 @@
    "status": "answered",
    "reason": null,
    "detail": null,
-   "sql": "SELECT weekday_trips FROM od_area_flows WHERE origin_area = 'WOODLANDS' AND destination_area = 'YISHUN' LIMIT 201",
+   "sql": "SELECT weekday_trips FROM od_area_flows WHERE origin_area = 'WOODLANDS' AND destination_area = 'YISHUN' LIMIT 200",
    "gold_sql": "SELECT weekday_trips FROM od_area_flows WHERE origin_area = 'WOODLANDS' AND destination_area = 'YISHUN'",
    "row_count": 1,
    "gold_row_count": 1,
    "correct": true,
-   "latency_ms": 10382.6,
+   "latency_ms": 9659.3,
    "model_calls": 1,
    "attempts": [
     {
@@ -3723,7 +3722,7 @@
    "row_count": 1,
    "gold_row_count": 1,
    "correct": false,
-   "latency_ms": 8704.6,
+   "latency_ms": 8694.5,
    "model_calls": 1,
    "attempts": [
     {
@@ -3747,7 +3746,7 @@
    "row_count": 1,
    "gold_row_count": 1,
    "correct": true,
-   "latency_ms": 11197.0,
+   "latency_ms": 10472.5,
    "model_calls": 1,
    "attempts": [
     {
@@ -3771,7 +3770,7 @@
    "row_count": 4,
    "gold_row_count": 4,
    "correct": true,
-   "latency_ms": 8588.6,
+   "latency_ms": 7691.2,
    "model_calls": 1,
    "attempts": [
     {
@@ -3790,12 +3789,12 @@
    "status": "answered",
    "reason": null,
    "detail": null,
-   "sql": "SELECT from_stop, to_stop, am_peak_buses_per_hour FROM corridor_links WHERE am_peak_buses_per_hour > 150 LIMIT 201",
+   "sql": "SELECT from_stop, to_stop, am_peak_buses_per_hour FROM corridor_links WHERE am_peak_buses_per_hour > 150 LIMIT 200",
    "gold_sql": "SELECT from_stop, to_stop FROM corridor_links WHERE am_peak_buses_per_hour > 150",
    "row_count": 1,
    "gold_row_count": 1,
    "correct": true,
-   "latency_ms": 11417.3,
+   "latency_ms": 9269.0,
    "model_calls": 1,
    "attempts": [
     {
@@ -3814,12 +3813,12 @@
    "status": "answered",
    "reason": null,
    "detail": null,
-   "sql": "SELECT s.stop_code, s.stop_name, sc.baseline_weekday_boardings, sc.aug_weekday_boardings, sc.pct_change FROM stop_changes AS sc JOIN stops AS s ON sc.stop_code = s.stop_code WHERE sc.flag = 'drop' LIMIT 201",
+   "sql": "SELECT s.stop_code, s.stop_name, sc.baseline_weekday_boardings, sc.aug_weekday_boardings, sc.pct_change FROM stop_changes AS sc JOIN stops AS s ON sc.stop_code = s.stop_code WHERE sc.flag = 'drop' LIMIT 200",
    "gold_sql": "SELECT stop_code FROM stop_changes WHERE flag = 'drop'",
    "row_count": 4,
    "gold_row_count": 4,
    "correct": true,
-   "latency_ms": 24822.4,
+   "latency_ms": 20841.6,
    "model_calls": 2,
    "attempts": [
     {
@@ -3843,12 +3842,12 @@
    "status": "answered",
    "reason": null,
    "detail": null,
-   "sql": "SELECT COUNT(*) FROM stop_changes WHERE flag = 'surge' LIMIT 201",
+   "sql": "SELECT COUNT(*) FROM stop_changes WHERE flag = 'surge' LIMIT 200",
    "gold_sql": "SELECT count(*) FROM stop_changes WHERE flag = 'surge'",
    "row_count": 1,
    "gold_row_count": 1,
    "correct": true,
-   "latency_ms": 9108.4,
+   "latency_ms": 7266.6,
    "model_calls": 1,
    "attempts": [
     {
@@ -3867,12 +3866,12 @@
    "status": "answered",
    "reason": null,
    "detail": null,
-   "sql": "SELECT operator, COUNT(DISTINCT service_no) AS n_services FROM services GROUP BY operator ORDER BY n_services DESC LIMIT 201",
+   "sql": "SELECT operator, COUNT(DISTINCT service_no) AS n_services FROM services GROUP BY operator ORDER BY n_services DESC LIMIT 200",
    "gold_sql": "SELECT operator, count(DISTINCT service_no) FROM services GROUP BY operator",
    "row_count": 4,
    "gold_row_count": 4,
    "correct": true,
-   "latency_ms": 9379.6,
+   "latency_ms": 8496.9,
    "model_calls": 1,
    "attempts": [
     {
@@ -3891,12 +3890,12 @@
    "status": "answered",
    "reason": null,
    "detail": null,
-   "sql": "SELECT COUNT(DISTINCT service_no) FROM services WHERE category = 'EXPRESS' LIMIT 201",
+   "sql": "SELECT COUNT(DISTINCT service_no) FROM services WHERE category = 'EXPRESS' LIMIT 200",
    "gold_sql": "SELECT count(DISTINCT service_no) FROM services WHERE category = 'EXPRESS'",
    "row_count": 1,
    "gold_row_count": 1,
    "correct": true,
-   "latency_ms": 7477.7,
+   "latency_ms": 7883.5,
    "model_calls": 1,
    "attempts": [
     {
@@ -3920,7 +3919,7 @@
    "row_count": 1,
    "gold_row_count": 1,
    "correct": true,
-   "latency_ms": 8123.6,
+   "latency_ms": 8919.8,
    "model_calls": 1,
    "attempts": [
     {
@@ -3939,12 +3938,12 @@
    "status": "answered",
    "reason": null,
    "detail": null,
-   "sql": "SELECT COUNT(*) FROM stops WHERE n_services = 1 LIMIT 201",
+   "sql": "SELECT COUNT(*) FROM stops WHERE n_services = 1 LIMIT 200",
    "gold_sql": "SELECT count(*) FROM stops WHERE n_services = 1",
    "row_count": 1,
    "gold_row_count": 1,
    "correct": true,
-   "latency_ms": 6537.2,
+   "latency_ms": 6896.8,
    "model_calls": 1,
    "attempts": [
     {
@@ -3968,7 +3967,7 @@
    "row_count": 1,
    "gold_row_count": 1,
    "correct": true,
-   "latency_ms": 10762.6,
+   "latency_ms": 10503.8,
    "model_calls": 1,
    "attempts": [
     {
@@ -3987,12 +3986,12 @@
    "status": "answered",
    "reason": null,
    "detail": null,
-   "sql": "SELECT residents_outside_walk_400m FROM planning_areas WHERE planning_area = 'TANGLIN' LIMIT 201",
+   "sql": "SELECT residents_outside_walk_400m FROM planning_areas WHERE planning_area = 'TANGLIN' LIMIT 200",
    "gold_sql": "SELECT residents_outside_walk_400m FROM planning_areas WHERE planning_area = 'TANGLIN'",
    "row_count": 1,
    "gold_row_count": 1,
    "correct": true,
-   "latency_ms": 8136.3,
+   "latency_ms": 8715.5,
    "model_calls": 1,
    "attempts": [
     {
@@ -4011,12 +4010,12 @@
    "status": "answered",
    "reason": null,
    "detail": null,
-   "sql": "SELECT planning_area FROM planning_areas WHERE residents >= 10000 AND stops_per_10k_residents < 8 LIMIT 201",
+   "sql": "SELECT planning_area FROM planning_areas WHERE residents >= 10000 AND stops_per_10k_residents < 8 LIMIT 200",
    "gold_sql": "SELECT planning_area FROM planning_areas WHERE residents >= 10000 AND stops_per_10k_residents < 8",
    "row_count": 5,
    "gold_row_count": 5,
    "correct": true,
-   "latency_ms": 10893.3,
+   "latency_ms": 9010.9,
    "model_calls": 1,
    "attempts": [
     {
@@ -4040,7 +4039,7 @@
    "row_count": 0,
    "gold_row_count": 1,
    "correct": false,
-   "latency_ms": 41791.9,
+   "latency_ms": 33494.2,
    "model_calls": 2,
    "attempts": [
     {
@@ -4065,12 +4064,12 @@
    "status": "answered",
    "reason": null,
    "detail": null,
-   "sql": "SELECT DISTINCT service_no FROM services WHERE NOT am_peak_headway_min IS NULL AND am_peak_headway_min >= 20 LIMIT 201",
+   "sql": "SELECT DISTINCT service_no FROM services WHERE NOT am_peak_headway_min IS NULL AND am_peak_headway_min >= 20 LIMIT 200",
    "gold_sql": "SELECT DISTINCT service_no FROM services WHERE am_peak_headway_min >= 20",
    "row_count": 53,
    "gold_row_count": 53,
    "correct": true,
-   "latency_ms": 9407.8,
+   "latency_ms": 8442.9,
    "model_calls": 1,
    "attempts": [
     {
@@ -4089,12 +4088,12 @@
    "status": "answered",
    "reason": null,
    "detail": null,
-   "sql": "SELECT AVG(am_peak_headway_min) AS avg_am_peak_headway FROM services WHERE category = 'FEEDER' AND NOT am_peak_headway_min IS NULL LIMIT 201",
+   "sql": "SELECT AVG(am_peak_headway_min) AS avg_am_peak_headway FROM services WHERE category = 'FEEDER' AND NOT am_peak_headway_min IS NULL LIMIT 200",
    "gold_sql": "SELECT avg(am_peak_headway_min) FROM services WHERE category = 'FEEDER'",
    "row_count": 1,
    "gold_row_count": 1,
    "correct": true,
-   "latency_ms": 10861.4,
+   "latency_ms": 9572.7,
    "model_calls": 1,
    "attempts": [
     {
@@ -4113,17 +4112,17 @@
    "status": "answered",
    "reason": null,
    "detail": null,
-   "sql": "SELECT stop_code, stop_name, weekday_boardings, pm_peak_share FROM stops WHERE planning_area = 'QUEENSTOWN' AND pm_peak_share > 0.6 LIMIT 201",
+   "sql": "SELECT stop_code, stop_name, pm_peak_share FROM stops WHERE planning_area = 'QUEENSTOWN' AND pm_peak_share > 0.6 LIMIT 200",
    "gold_sql": "SELECT stop_code FROM stops WHERE planning_area = 'QUEENSTOWN' AND pm_peak_share > 0.6",
    "row_count": 12,
    "gold_row_count": 12,
    "correct": true,
-   "latency_ms": 10704.5,
+   "latency_ms": 9987.4,
    "model_calls": 1,
    "attempts": [
     {
      "engine": "llm",
-     "sql": "SELECT stop_code, stop_name, weekday_boardings, pm_peak_share FROM stops WHERE planning_area = 'QUEENSTOWN' AND pm_peak_share > 0.6"
+     "sql": "SELECT stop_code, stop_name, pm_peak_share FROM stops WHERE planning_area = 'QUEENSTOWN' AND pm_peak_share > 0.6"
     }
    ]
   },
@@ -4137,12 +4136,12 @@
    "status": "answered",
    "reason": null,
    "detail": null,
-   "sql": "SELECT stop_code, stop_name, peak_hour FROM stops WHERE planning_area = 'CLEMENTI' AND peak_hour = 8 LIMIT 201",
+   "sql": "SELECT stop_code, stop_name, peak_hour FROM stops WHERE planning_area = 'CLEMENTI' AND peak_hour = 8 LIMIT 200",
    "gold_sql": "SELECT stop_code FROM stops WHERE planning_area = 'CLEMENTI' AND peak_hour = 8",
    "row_count": 26,
    "gold_row_count": 26,
    "correct": true,
-   "latency_ms": 8780.6,
+   "latency_ms": 8768.9,
    "model_calls": 1,
    "attempts": [
     {
@@ -4161,12 +4160,12 @@
    "status": "answered",
    "reason": null,
    "detail": null,
-   "sql": "SELECT SUM(weekday_boardings) AS total_weekday_boardings FROM stops WHERE region = 'CENTRAL REGION' AND NOT weekday_boardings IS NULL LIMIT 201",
+   "sql": "SELECT SUM(weekday_boardings) AS total_weekday_boardings FROM stops WHERE region = 'CENTRAL REGION' AND NOT weekday_boardings IS NULL LIMIT 200",
    "gold_sql": "SELECT sum(weekday_boardings) FROM stops WHERE region = 'CENTRAL REGION'",
    "row_count": 1,
    "gold_row_count": 1,
    "correct": true,
-   "latency_ms": 9357.1,
+   "latency_ms": 9104.6,
    "model_calls": 1,
    "attempts": [
     {
@@ -4185,12 +4184,12 @@
    "status": "answered",
    "reason": null,
    "detail": null,
-   "sql": "SELECT AVG(weekday_boardings) AS avg_weekday_boardings FROM stops WHERE planning_area = 'PUNGGOL' AND NOT weekday_boardings IS NULL LIMIT 201",
+   "sql": "SELECT AVG(weekday_boardings) AS avg_weekday_boardings FROM stops WHERE planning_area = 'PUNGGOL' AND NOT weekday_boardings IS NULL LIMIT 200",
    "gold_sql": "SELECT avg(weekday_boardings) FROM stops WHERE planning_area = 'PUNGGOL'",
    "row_count": 1,
    "gold_row_count": 1,
    "correct": true,
-   "latency_ms": 10478.0,
+   "latency_ms": 10455.7,
    "model_calls": 1,
    "attempts": [
     {
@@ -4209,12 +4208,12 @@
    "status": "answered",
    "reason": null,
    "detail": null,
-   "sql": "SELECT COUNT(*) FROM stops WHERE road_name = 'Orchard Rd' LIMIT 201",
+   "sql": "SELECT COUNT(*) FROM stops WHERE road_name = 'Orchard Rd' LIMIT 200",
    "gold_sql": "SELECT count(*) FROM stops WHERE road_name = 'Orchard Rd'",
    "row_count": 1,
    "gold_row_count": 1,
    "correct": true,
-   "latency_ms": 7298.1,
+   "latency_ms": 7287.4,
    "model_calls": 1,
    "attempts": [
     {
@@ -4233,12 +4232,12 @@
    "status": "answered",
    "reason": null,
    "detail": null,
-   "sql": "SELECT stop_code, stop_name, weekday_boardings FROM stops WHERE road_name = 'CLEMENTI RD' AND weekday_boardings > 2000 LIMIT 201",
+   "sql": "SELECT stop_code, stop_name, weekday_boardings FROM stops WHERE road_name = 'CLEMENTI RD' AND weekday_boardings > 2000 LIMIT 200",
    "gold_sql": "SELECT stop_code FROM stops WHERE road_name = 'Clementi Rd' AND weekday_boardings > 2000",
    "row_count": 0,
    "gold_row_count": 3,
    "correct": false,
-   "latency_ms": 10503.5,
+   "latency_ms": 9517.5,
    "model_calls": 1,
    "attempts": [
     {
@@ -4257,12 +4256,12 @@
    "status": "answered",
    "reason": null,
    "detail": null,
-   "sql": "SELECT origin_stop, destination_stop FROM services WHERE service_no = '96' AND direction = 1 LIMIT 201",
+   "sql": "SELECT origin_stop, destination_stop FROM services WHERE service_no = '96' AND direction = 1 LIMIT 200",
    "gold_sql": "SELECT origin_stop, destination_stop FROM services WHERE service_no = '96' AND direction = 1",
    "row_count": 1,
    "gold_row_count": 1,
    "correct": true,
-   "latency_ms": 10765.8,
+   "latency_ms": 7984.5,
    "model_calls": 1,
    "attempts": [
     {
@@ -4281,12 +4280,12 @@
    "status": "answered",
    "reason": null,
    "detail": null,
-   "sql": "SELECT s.planning_area FROM stops AS s WHERE s.stop_code = '46009' LIMIT 201",
+   "sql": "SELECT s.planning_area FROM stops AS s WHERE s.stop_code = '46009' LIMIT 200",
    "gold_sql": "SELECT planning_area FROM stops WHERE stop_code = '46009'",
    "row_count": 1,
    "gold_row_count": 1,
    "correct": true,
-   "latency_ms": 10688.6,
+   "latency_ms": 8086.3,
    "model_calls": 1,
    "attempts": [
     {
@@ -4305,17 +4304,17 @@
    "status": "answered",
    "reason": null,
    "detail": null,
-   "sql": "SELECT s.subzone, s.n_stops FROM subzones AS s JOIN planning_areas AS p ON s.planning_area = p.planning_area WHERE p.planning_area = 'TOA PAYOH' ORDER BY n_stops DESC LIMIT 1",
+   "sql": "SELECT s.subzone, s.n_stops FROM subzones AS s WHERE s.planning_area = 'TOA PAYOH' ORDER BY n_stops DESC LIMIT 1",
    "gold_sql": "SELECT subzone FROM subzones WHERE planning_area = 'TOA PAYOH' ORDER BY n_stops DESC LIMIT 1",
    "row_count": 1,
    "gold_row_count": 1,
    "correct": true,
-   "latency_ms": 16691.7,
+   "latency_ms": 9988.7,
    "model_calls": 1,
    "attempts": [
     {
      "engine": "llm",
-     "sql": "SELECT s.subzone, s.n_stops FROM subzones s JOIN planning_areas p ON s.planning_area = p.planning_area WHERE p.planning_area = 'TOA PAYOH' ORDER BY n_stops DESC LIMIT 1"
+     "sql": "SELECT s.subzone, s.n_stops FROM subzones s WHERE s.planning_area = 'TOA PAYOH' ORDER BY n_stops DESC LIMIT 1"
     }
    ]
   },
@@ -4329,12 +4328,12 @@
    "status": "answered",
    "reason": null,
    "detail": null,
-   "sql": "SELECT weekday_trips FROM od_area_flows WHERE origin_area = 'JURONG EAST' AND destination_area = 'CLEMENTI' LIMIT 201",
+   "sql": "SELECT weekday_trips FROM od_area_flows WHERE origin_area = 'JURONG EAST' AND destination_area = 'CLEMENTI' LIMIT 200",
    "gold_sql": "SELECT weekday_trips FROM od_area_flows WHERE origin_area = 'JURONG EAST' AND destination_area = 'CLEMENTI'",
    "row_count": 1,
    "gold_row_count": 1,
    "correct": true,
-   "latency_ms": 12231.2,
+   "latency_ms": 8901.9,
    "model_calls": 1,
    "attempts": [
     {
@@ -4353,12 +4352,12 @@
    "status": "answered",
    "reason": null,
    "detail": null,
-   "sql": "SELECT SUM(link_km) AS combined_length_km FROM corridor_links WHERE n_services >= 10 LIMIT 201",
+   "sql": "SELECT SUM(link_km) AS combined_length_km FROM corridor_links WHERE n_services >= 10 LIMIT 200",
    "gold_sql": "SELECT sum(link_km) FROM corridor_links WHERE n_services >= 10",
    "row_count": 1,
    "gold_row_count": 1,
    "correct": true,
-   "latency_ms": 10329.4,
+   "latency_ms": 8019.1,
    "model_calls": 1,
    "attempts": [
     {
@@ -4377,12 +4376,12 @@
    "status": "answered",
    "reason": null,
    "detail": null,
-   "sql": "SELECT subzone FROM subzones WHERE residents > 1000 AND n_stops = 0 LIMIT 201",
+   "sql": "SELECT subzone FROM subzones WHERE residents > 1000 AND n_stops = 0 LIMIT 200",
    "gold_sql": "SELECT subzone FROM subzones WHERE residents > 1000 AND n_stops = 0",
    "row_count": 3,
    "gold_row_count": 3,
    "correct": true,
-   "latency_ms": 11883.4,
+   "latency_ms": 8462.5,
    "model_calls": 1,
    "attempts": [
     {
@@ -4520,12 +4519,12 @@
    "row_count": 0,
    "gold_row_count": null,
    "correct": false,
-   "latency_ms": 6323.4,
+   "latency_ms": 4953.7,
    "model_calls": 1,
    "attempts": [
     {
      "engine": "llm",
-     "reply": "```sql\nSELECT CANNOT_ANSWER\n```",
+     "reply": "CANNOT_ANSWER",
      "error": "model declined"
     }
    ]
@@ -4545,7 +4544,7 @@
    "row_count": 0,
    "gold_row_count": null,
    "correct": false,
-   "latency_ms": 6155.0,
+   "latency_ms": 5767.3,
    "model_calls": 1,
    "attempts": [
     {
@@ -4608,7 +4607,7 @@
    "row_count": 0,
    "gold_row_count": null,
    "correct": false,
-   "latency_ms": 6089.6,
+   "latency_ms": 6255.0,
    "model_calls": 1,
    "attempts": [
     {
@@ -4709,12 +4708,12 @@
    "row_count": 0,
    "gold_row_count": null,
    "correct": false,
-   "latency_ms": 6699.1,
+   "latency_ms": 5263.4,
    "model_calls": 1,
    "attempts": [
     {
      "engine": "llm",
-     "reply": "```sql\nSELECT CANNOT_ANSWER\n```",
+     "reply": "CANNOT_ANSWER",
      "error": "model declined"
     }
    ]

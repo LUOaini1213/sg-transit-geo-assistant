@@ -51,10 +51,11 @@ def pct(xs, p):
 def summarise(records: list[dict]) -> dict:
     out = {}
     for engine in sorted({r["engine"] for r in records}):
-        for split in ["dev", "test", "all"]:
+        for split in sorted({r["split"] for r in records}) + ["all"]:
             rs = [r for r in records if r["engine"] == engine and (split == "all" or r["split"] == split)]
             ans = [r for r in rs if r["kind"] == "answerable"]
             adv = [r for r in rs if r["kind"] == "adversarial"]
+            ben = [r for r in rs if r["kind"] == "benign"]
             lat = [r["latency_ms"] for r in rs]
             out.setdefault(engine, {})[split] = {
                 "answerable": len(ans),
@@ -65,6 +66,10 @@ def summarise(records: list[dict]) -> dict:
                 "adversarial": len(adv),
                 "adversarial_refused": sum(r["status"] == "refused" for r in adv),
                 "adversarial_refusal_rate": round(sum(r["status"] == "refused" for r in adv) / len(adv), 4) if adv else None,
+                "benign": len(ben),
+                "benign_refused": sum(r["status"] == "refused" for r in ben),
+                "benign_refused_by_screen": sum((r["reason"] or "").startswith("prescreen_") for r in ben),
+                "false_refusal_rate": round(sum(r["status"] == "refused" for r in ben) / len(ben), 4) if ben else None,
                 "latency_ms_median": round(statistics.median(lat), 1) if lat else None,
                 "latency_ms_p90": round(pct(lat, 90), 1) if lat else None,
                 "latency_ms_max": round(max(lat), 1) if lat else None,
@@ -93,9 +98,11 @@ def derive_auto(records: list[dict]) -> list[dict]:
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--engines", default="template,llm")
-    ap.add_argument("--split", choices=["dev", "test", "all"], default="all")
+    ap.add_argument("--split", choices=["dev", "test", "heldout", "all"], default="all")
     ap.add_argument("--no-prescreen", action="store_true", help="ablation: skip the question-text screen")
-    ap.add_argument("--kind", choices=["answerable", "adversarial", "all"], default="all")
+    ap.add_argument("--kind", choices=["answerable", "adversarial", "benign", "all"], default="all")
+    ap.add_argument("--questions", default="eval/questions.jsonl",
+                    help="question file; the held-out file has adversarial and benign prompts without gold SQL")
     ap.add_argument("--tag", default="", help="suffix for the output file names")
     a = ap.parse_args()
 
@@ -105,7 +112,9 @@ def main():
                                     settings.llm_reasoning_effort)
     assistant = Assistant(db, TemplateEngine(Catalog.load(db)), client, max_rows=settings.max_rows,
                           timeout_s=settings.query_timeout_s, prescreen=not a.no_prescreen)
-    questions = [json.loads(line) for line in (ROOT / "eval" / "questions.jsonl").read_text(encoding="utf-8").splitlines() if line]
+    questions = [json.loads(line) for line in (ROOT / a.questions).read_text(encoding="utf-8").splitlines() if line]
+    for q in questions:
+        q.setdefault("split", "heldout")
     if a.split != "all":
         questions = [q for q in questions if q["split"] == a.split]
     if a.kind != "all":
@@ -135,7 +144,7 @@ def main():
             }
             records.append(rec)
             mark = "ok " if correct else ("REF" if ans.status == "refused" else "BAD")
-            if q["kind"] == "adversarial":
+            if q["kind"] in ("adversarial", "benign"):
                 mark = "ref" if ans.status == "refused" else "ANS"
             print(f"{engine:8s} {q['id']} {q['split']:4s} {mark} {ans.latency_ms:8.0f} ms  {ans.reason or ''}", flush=True)
 
@@ -150,7 +159,7 @@ def main():
         "prescreen": not a.no_prescreen,
         "max_rows": settings.max_rows, "query_timeout_s": settings.query_timeout_s,
         "python": platform.python_version(), "duckdb": duckdb.__version__, "platform": platform.platform(),
-        "gpu": gpu_name(), "questions": len(questions), "split": a.split, "kind": a.kind,
+        "gpu": gpu_name(), "questions": len(questions), "question_file": a.questions, "split": a.split, "kind": a.kind,
     }
     OUT.mkdir(parents=True, exist_ok=True)
     suffix = f"_{a.tag}" if a.tag else ""

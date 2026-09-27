@@ -29,8 +29,9 @@ def test_accepts_read_only_queries(sql):
     assert out.upper().startswith(("SELECT", "WITH"))
 
 
+# Queries without a small enough LIMIT fetch one row more than the cap, so the caller can report that rows were cut.
 def test_adds_limit_when_missing():
-    assert limit_of(validate("SELECT stop_code FROM stops", 200)) == 200
+    assert limit_of(validate("SELECT stop_code FROM stops", 200)) == 201
 
 
 def test_keeps_small_limit():
@@ -38,16 +39,16 @@ def test_keeps_small_limit():
 
 
 def test_caps_large_limit():
-    assert limit_of(validate("SELECT stop_code FROM stops LIMIT 100000", 200)) == 200
+    assert limit_of(validate("SELECT stop_code FROM stops LIMIT 100000", 200)) == 201
 
 
 def test_replaces_non_literal_limit():
-    assert limit_of(validate("SELECT stop_code FROM stops LIMIT (SELECT 5)", 200)) == 200
+    assert limit_of(validate("SELECT stop_code FROM stops LIMIT (SELECT 5)", 200)) == 201
 
 
 def test_set_operation_is_wrapped_and_limited():
     out = validate("SELECT stop_code FROM stops UNION SELECT origin_stop FROM od_stop_flows", 50)
-    assert limit_of(out) == 50
+    assert limit_of(out) == 51
     assert "UNION" in out.upper()
 
 
@@ -114,3 +115,30 @@ def test_cte_name_is_allowed_but_not_other_tables():
 ])
 def test_extract_sql(reply, expected):
     assert extract_sql(reply) == expected
+
+
+# Found in review (2026-09-28): a CTE named after a system view or a hidden table used to pass the allow-list,
+# because CTE names were collected from the whole query instead of resolved in the scope where they are used.
+@pytest.mark.parametrize("sql,code", [
+    ("WITH duckdb_databases AS (SELECT * FROM duckdb_databases) SELECT * FROM duckdb_databases", "cte_name_not_allowed"),
+    ("WITH sqlite_master AS (SELECT * FROM sqlite_master) SELECT * FROM sqlite_master", "cte_name_not_allowed"),
+    ("WITH stops AS (SELECT * FROM stops) SELECT * FROM stops", "cte_name_not_allowed"),
+    ("WITH x AS (SELECT * FROM duckdb_tables) SELECT * FROM x", "unknown_table"),
+    ("SELECT * FROM (WITH subzone_shapes AS (SELECT 1 AS a) SELECT a FROM subzone_shapes) q, subzone_shapes",
+     "unknown_table"),
+    ("SELECT a FROM (WITH hidden AS (SELECT 1 AS a) SELECT a FROM hidden) q WHERE a IN (SELECT a FROM hidden)",
+     "unknown_table"),
+    ("WITH RECURSIVE r(n) AS (SELECT 1 UNION ALL SELECT n + 1 FROM r) SELECT n FROM r", "recursive_cte"),
+    ("SELECT lpad('x', 20000000, 'y') AS s FROM stops", "function_not_allowed"),
+    ("SELECT * FROM stops USING SAMPLE 10", "forbidden_statement"),
+])
+def test_review_bypasses_are_refused(sql, code):
+    with pytest.raises(Refusal) as e:
+        validate(sql, 200)
+    assert str(e.value).startswith(code)
+
+
+def test_cte_visible_in_its_scope_still_works():
+    sql = ("WITH busy AS (SELECT stop_code, weekday_boardings FROM stops) "
+           "SELECT b.stop_code FROM busy b WHERE b.stop_code IN (SELECT stop_code FROM busy) ORDER BY 1")
+    assert validate(sql, 200).upper().startswith("WITH")
