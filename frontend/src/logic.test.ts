@@ -120,6 +120,7 @@ describe("refusalMessage and stop codes", () => {
   it("explains refusals", () => {
     expect(refusalMessage("prescreen_write_request")).toMatch(/only reads/);
     expect(refusalMessage("model_declined")).toMatch(/cannot answer/);
+    expect(refusalMessage("template_unsupported_constraint")).toBe("The keyword rules cannot apply all the conditions in this question. Try rephrasing it or using the language model.");
     expect(refusalMessage("something_new")).toBe("Refused (something_new).");
   });
   it("accepts only 5-digit stop codes", () => {

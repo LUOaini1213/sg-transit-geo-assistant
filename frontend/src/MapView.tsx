@@ -4,7 +4,7 @@ import "maplibre-gl/dist/maplibre-gl.css";
 // MapLibre finds its worker next to its own module file, which a bundler moves. Let Vite bundle the worker
 // (with its shared chunk) and tell MapLibre where it ended up.
 import workerUrl from "maplibre-gl/dist/maplibre-gl-worker.mjs?worker&url";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   boundsOf, coverageColorExpression, demandColorExpression, formatCell, geometryKind, odLineWidth,
   type FeatureCollection,
@@ -43,12 +43,25 @@ function popupHtml(props: Record<string, unknown>): string {
     .join("");
 }
 
+interface ActivePopup {
+  source: "od" | "result";
+  popup: maplibregl.Popup;
+}
+
+function removePopup(ref: { current: ActivePopup | null }, source?: ActivePopup["source"]) {
+  if (!ref.current || (source && ref.current.source !== source)) return;
+  ref.current.popup.remove();
+  ref.current = null;
+}
+
 export default function MapView({ layers, showStops, showCoverage, onStopClick }: Props) {
   const box = useRef<HTMLDivElement>(null);
-  const mapRef = useRef<maplibregl.Map | null>(null);
-  const ready = useRef(false);
-  const latest = useRef(layers);
-  latest.current = layers;
+  // Readiness is state so every layer effect also runs with the latest props after load.
+  const [map, setMap] = useState<maplibregl.Map | null>(null);
+  // Fast Refresh / React effect reconnection retains state after disposing its map.
+  // Effects must only touch the live instance, and only after that instance loads.
+  const liveMap = useRef<maplibregl.Map | null>(null);
+  const popupRef = useRef<ActivePopup | null>(null);
   const clickRef = useRef(onStopClick);
   clickRef.current = onStopClick;
 
@@ -61,11 +74,13 @@ export default function MapView({ layers, showStops, showCoverage, onStopClick }
       zoom: 10.4,
       attributionControl: { compact: false },
     });
-    mapRef.current = map;
+    liveMap.current = map;
+    let disposed = false;
     if (import.meta.env.DEV) (window as unknown as { __map?: unknown }).__map = map; // for debugging in the browser console
     map.addControl(new maplibregl.NavigationControl({ showCompass: false }), "top-right");
 
     map.on("load", () => {
+      if (disposed) return;
       for (const id of ["coverage", "stops", "od", "result"]) map.addSource(id, { type: "geojson", data: EMPTY as GeoJSON.FeatureCollection });
       map.addLayer({ id: "coverage-fill", type: "fill", source: "coverage",
         paint: { "fill-color": coverageColorExpression() as never, "fill-opacity": 0.4 } });
@@ -87,11 +102,7 @@ export default function MapView({ layers, showStops, showCoverage, onStopClick }
         paint: { "line-color": RESULT, "line-width": 2.5 } });
       map.addLayer({ id: "result-point", type: "circle", source: "result", filter: ["==", ["geometry-type"], "Point"],
         paint: { "circle-color": RESULT, "circle-radius": 6, "circle-stroke-color": "#fff", "circle-stroke-width": 1.5 } });
-      ready.current = true;
-      const l = latest.current;
-      setData(map, "coverage", l.coverage);
-      setData(map, "stops", l.stops);
-      setData(map, "result", l.result);
+      setMap(map);
     });
 
     map.on("click", "stops", (e: MapLayerMouseEvent) => {
@@ -104,7 +115,11 @@ export default function MapView({ layers, showStops, showCoverage, onStopClick }
         if (!f) return;
         const props = { ...(f.properties as Record<string, unknown>) };
         delete props._width;
-        new maplibregl.Popup({ maxWidth: "280px", focusAfterOpen: false }).setLngLat(e.lngLat).setHTML(popupHtml(props)).addTo(map);
+        removePopup(popupRef);
+        popupRef.current = {
+          source: id === "od" ? "od" : "result",
+          popup: new maplibregl.Popup({ maxWidth: "280px", focusAfterOpen: false }).setLngLat(e.lngLat).setHTML(popupHtml(props)).addTo(map),
+        };
       });
     }
     for (const id of ["stops", "result-point", "result-line", "result-fill", "od"]) {
@@ -112,24 +127,24 @@ export default function MapView({ layers, showStops, showCoverage, onStopClick }
       map.on("mouseleave", id, () => (map.getCanvas().style.cursor = ""));
     }
     return () => {
-      ready.current = false;
+      disposed = true;
+      if (liveMap.current === map) liveMap.current = null;
+      removePopup(popupRef);
       map.remove();
     };
   }, []);
 
   useEffect(() => {
-    const map = mapRef.current;
-    if (map && ready.current) setData(map, "stops", layers.stops);
-  }, [layers.stops]);
+    if (map && map === liveMap.current) setData(map, "stops", layers.stops);
+  }, [map, layers.stops]);
 
   useEffect(() => {
-    const map = mapRef.current;
-    if (map && ready.current) setData(map, "coverage", layers.coverage);
-  }, [layers.coverage]);
+    if (map && map === liveMap.current) setData(map, "coverage", layers.coverage);
+  }, [map, layers.coverage]);
 
   useEffect(() => {
-    const map = mapRef.current;
-    if (!map || !ready.current) return;
+    if (!map || map !== liveMap.current) return;
+    removePopup(popupRef, "od");
     const od = layers.od;
     const max = Math.max(0, ...(od?.features ?? []).map((f) => Number(f.properties.weekday_trips) || 0));
     const withWidth = od && {
@@ -139,30 +154,28 @@ export default function MapView({ layers, showStops, showCoverage, onStopClick }
     setData(map, "od", withWidth);
     const b = boundsOf(od);
     if (b) map.fitBounds(b, { padding: 60, maxZoom: 14, duration: 600 });
-  }, [layers.od]);
+  }, [map, layers.od]);
 
   useEffect(() => {
-    const map = mapRef.current;
-    if (!map || !ready.current) return;
+    if (!map || map !== liveMap.current) return;
+    removePopup(popupRef, "result");
     setData(map, "result", layers.result);
     const b = boundsOf(layers.result);
     if (b) {
       const single = geometryKind(layers.result) === "point" && layers.result!.features.length === 1;
       map.fitBounds(b, { padding: 60, maxZoom: single ? 15 : 14, duration: 600 });
     }
-  }, [layers.result]);
+  }, [map, layers.result]);
 
   useEffect(() => {
-    const map = mapRef.current;
-    if (!map || !ready.current) return;
+    if (!map || map !== liveMap.current) return;
     map.setLayoutProperty("stops", "visibility", showStops ? "visible" : "none");
-  }, [showStops]);
+  }, [map, showStops]);
 
   useEffect(() => {
-    const map = mapRef.current;
-    if (!map || !ready.current) return;
+    if (!map || map !== liveMap.current) return;
     for (const id of ["coverage-fill", "coverage-line"]) map.setLayoutProperty(id, "visibility", showCoverage ? "visible" : "none");
-  }, [showCoverage]);
+  }, [map, showCoverage]);
 
   return <div ref={box} className="map" role="region" aria-label="Map of Singapore bus stops" />;
 }

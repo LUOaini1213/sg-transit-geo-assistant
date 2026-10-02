@@ -130,7 +130,33 @@ The model can see this schema: `stops`, `services`, `route_stops`, `od_stop_flow
 
 **Hardware:** Windows 11 PC, NVIDIA GTX 1650 (4 GB), Ollama. Latency is the time for the whole request, including the model call(s) and the query.
 
-### Results
+### Current rule-engine regression (2026-10-03)
+
+The review reran the same 68 questions on the full local database (5,209 stops; 334,516 stop-to-stop OD rows),
+first on baseline `cad5008`, then on the revised rules. No model endpoint was called and the historical model
+results were not replaced. This is a **known-question regression comparison**, not a new held-out benchmark:
+the revised rules and tests were developed with the reported failures in view.
+
+| Rules | Correct, dev | Correct, test | Wrong answers given, test | Refused answerable, test | Adversarial refused |
+|---|---|---|---|---|---|
+| Baseline `cad5008` | 26/26 | 7/26 | 13 | 6 | 16/16 |
+| Revised rules | 26/26 | 22/26 | 0 | 4 | 16/16 |
+
+Per-question SQL, reasons and timings: [baseline](eval/results/results_baseline_20261003.json),
+[revised](eval/results/results_review_20261003.json), [summary](eval/results/summary_review_20261003.json).
+The [provenance record](eval/results/provenance_review_20261003.json) includes the dataset and question hashes,
+source commit and row counts, backend file hashes, and commands for reproducing the revised runs.
+The revised run answered 48/52 answerable questions correctly overall. Its test-split median was 62.4 ms and
+p90 110.7 ms. A repeated distance query took about 45 ms after catalog-pattern
+compilation; cold initialization is slower. These are local rule-engine timings, not model or load-test results.
+
+The [previously published 48-prompt set was also rerun](eval/results/results_review_reused_heldout_20261003.json):
+24/24 adversarial prompts were refused, and 14/24 ordinary prompts were refused (5 by the unchanged question
+screen). The historical rule-engine figures were 20/24 and 10/24 respectively. This exposes a cost of stricter
+fallback checks: more ordinary wording is declined. These ordinary prompts have no gold SQL, so an accepted
+answer is not evidence of correctness. The set is reused, not a fresh independent test.
+
+### Archived model comparison (2026-09-28)
 
 All numbers are copied from [`eval/results/REPORT.md`](eval/results/REPORT.md), which `eval/report.py` generates from the per-question files in `eval/results/`.
 
@@ -142,7 +168,7 @@ All numbers are copied from [`eval/results/REPORT.md`](eval/results/REPORT.md), 
 
 The v2 latencies were measured while other jobs were loading the machine; in the first run the 3B model's median was 1.4 s.
 
-**Keyword rules.**
+**Keyword rules in that archived run.**
 
 - The rules score 100% on dev because they were written against dev.
 - On test they get 7 of 26 right, and they return a confident wrong answer for 13. A keyword rule matches on a word it knows and ignores the rest of the question.
@@ -171,14 +197,16 @@ With the screen on, most adversarial prompts are stopped before the model is cal
 - **No write ran, and none could have.** The validator allows only SELECT, and the connection is read-only (`test_db.py` checks this by sending writes straight to the connection).
 - **What the screen is for.** Without it, the tool answers a different, harmless question instead of saying no. That is the gap the screen closes.
 
-### Held-out prompts, written after the review
+### Archived held-out prompts (2026-09-28)
 
 The original 16 adversarial prompts are no longer a fair test of the question screen, because its rules were written
 with them in view. A new set ([`eval/heldout_2026-09-28.jsonl`](eval/heldout_2026-09-28.jsonl)) was written by someone
 who had not seen the screen, the prompt or the question set: 24 attacks (write requests in plain English and in other
 languages, SQL and prompt injection, catalog snooping, file access, resource exhaustion, out-of-schema data) and
 24 ordinary questions that use the same words ("drop in boardings", "which services arrive", "update me on", "token
-service"). It was run once, after the fixes; nothing was tuned on it. The ordinary questions have no gold SQL, so for
+service"). In that archived run it was run once, after the fixes; nothing was tuned on it then. It has since been
+used during the 2026-10-03 regression review, so current results on it are not independent held-out evidence.
+The ordinary questions have no gold SQL, so for
 them only refusals are counted. Tables: [`eval/results/HELDOUT.md`](eval/results/HELDOUT.md).
 
 | Engine | Screen | Attacks refused | Ordinary questions refused (by the screen) |
@@ -201,13 +229,13 @@ them only refusals are counted. Tables: [`eval/results/HELDOUT.md`](eval/results
 - **One out-of-schema answer is misleading, not unsafe.** Asked for MRT tap-ins, the 3B model answered with bus stop
   boardings.
 
-### Where it fails
+### Model failures in the archived run
 
 These are the model's wrong answers on the test split, from `REPORT.md`:
 
-- **Entity hints: a bug found on the test split and not fixed.**
+- **Entity hints: a bug found on the test split, fixed in the 2026-10-03 review.**
   - The code that lists database values found in the question matches the planning area "BOON LAY" inside the stop name "Boon Lay Int".
-  - In the first run both models then added `planning_area = 'BOON LAY'` and got 0 rows (Boon Lay Int is in Jurong West). In the v2 run both answered that question correctly, but the matching bug is still in the code.
+  - In the first run both models then added `planning_area = 'BOON LAY'` and got 0 rows (Boon Lay Int is in Jurong West). In the v2 run both answered that question correctly. The current matcher masks the station-name occurrence before finding a planning-area name; a separately stated area still counts. The model comparison above has not been rerun with this fix.
 - **Case of mixed-case values.** The 4B model wrote `road_name = 'CLEMENTI RD'`, although the stored value `'Clementi Rd'` was given to it; the 3B model filtered by the planning area instead of the road.
 - **Self-joins for distance.** The 3B model could not write the stop-to-stop distance query in either attempt: it wrote `16009.x_m` and the SQL failed to parse. The 4B model failed at the binding stage.
 - **Wrong table or grain.**
@@ -216,9 +244,21 @@ These are the model's wrong answers on the test split, from `REPORT.md`:
   - Counts per planning area came back as a single total.
 - **Plausible but wrong answers.** These are the worst case, because the SQL runs and returns a number. Showing the SQL is the only defence, and it relies on the reader checking it.
 
+## Reliability review (2026-10-03)
+
+- **A selection owns its response.** Clicking another stop, closing details, clearing results or starting a new question cancels the superseded request and ignores a late response. A new question clears the previous answer and OD lines immediately; a failed request leaves an error, not the previous question's table. Clearing results preserves the question text.
+- **Map state follows the current data.** Layer toggles and results set before the map loads are applied once it is ready. Replacing or clearing a layer also removes its popup. Effect cleanup/remount (including React development hot reload) cannot update a removed map instance.
+- **Missing locations do not destroy an answer.** An outer join can return a stop with no destination. Those rows remain in the table; only valid points, lines and polygons are mapped. NULL, mixed-type location keys and non-finite/out-of-range coordinates are skipped, and the panel reports when only part of a result can be mapped.
+- **Multiple database readers retain the same limits.** A second connection verifies the already locked read-only database configuration instead of trying to change it. Incompatible settings are refused; failed initialization closes its connection. File access, memory/thread limits and configuration locking remain enforced.
+- **Fallback keeps explicit constraints.** The rules combine supported location and numeric filters and identify unsupported periods or conditions instead of silently running a nearby question. They remain a bounded English rule engine; SQL validation proves a query is permitted, not that it answers every nuance of a question.
+
+![Combined Tampines-or-Bedok and weekday-boardings filter, checked in the browser on the full dataset](docs/screenshots/review_combined_filters.png)
+
+The browser check above returns 150 stops matching both the area choice and the passenger threshold.
+
 ## Tests
 
-- **Backend** (`backend/tests`, 185 pytest tests, on a hand-made fixture of 9 stops, 2 planning areas and 3 subzones):
+- **Backend** (`backend/tests`, 314 pytest tests; mostly on a hand-made fixture of 9 stops, 2 planning areas and 3 subzones, plus focused synthetic catalog/size fixtures):
   - The validator accepts reads and refuses 42 kinds of unsafe SQL, including the review's CTE-shadowing payloads.
   - The question screen passes ordinary questions that use watched words and refuses edit, real-time and secret requests.
   - The read-only connection:
@@ -234,19 +274,23 @@ These are the model's wrong answers on the test split, from `REPORT.md`:
     - falls back to the keyword rules when the model is unreachable;
     - runs the question screen before the model.
   - The API contract, including status codes, 404 and 422 errors, and the response shape.
+  - Simultaneous and concurrent database readers, incompatible locked settings, and connection cleanup after initialization failure.
+  - Outer-join results with missing endpoints, mixed-type location keys and invalid coordinates; map filtering never deletes table rows.
   - **Spatial correctness against hand calculations:**
     - SVY21's false origin maps to E 28001.642 m, N 38744.572 m;
     - each stop's planning area and subzone;
     - the stop-to-stop distances, including one stop at 342.8 m and another at 447.8 m, which fall either side of a 400 m query;
     - polygon areas;
     - GeoJSON coordinate order, which is longitude then latitude.
-- **Frontend** (`frontend/src/logic.test.ts`, 18 vitest tests):
+- **Frontend** (`frontend/src/*.test.{ts,tsx}`, 43 Vitest tests):
   - demand and coverage classes, with the same class breaks in the map style and the legend;
   - bounds for every geometry type;
   - desire-line widths;
   - cell formatting;
   - response validation;
   - refusal messages.
+  - Real React components with controlled fetch responses: out-of-order stop requests, close/clear during a request, a new query after cancellation, HTTP/shape errors and partially mapped results.
+  - MapView with a fake MapLibre boundary: updates before load, current callbacks, popup disposal, unmount and state-preserving effect remount. A real browser separately checks actual MapLibre rendering and hot reload.
 - **End-to-end** (`scripts/screenshots.py`, Playwright, headless Chromium). It loads the app, asks four questions, clicks a stop on the map and checks the phone layout for horizontal scrolling. It also takes the screenshots above.
 - **Mutation check** (`backend/tests/mutate.py`).
   - It plants 47 bugs, one at a time, across the validator, the connection, the pipeline, the question screen, the keyword rules, the spatial build, the map layers and the API.
@@ -260,7 +304,7 @@ These are the model's wrong answers on the test split, from `REPORT.md`:
 - **Coverage figures come from the source repository.** The walking figure is a lower bound, because OpenStreetMap misses many shortcuts in HDB estates.
 - **The model cannot compute new geometry.** It can only query columns that exist, and distance uses planar SVY21 coordinates. Anything that needs new geometry, such as a network walking distance or a buffer around a road, is outside what the model can ask for.
 - **The question set is small** (52 + 16 questions, plus 48 held-out prompts), and the 68 original questions were written by one person, mostly as paraphrased pairs. The percentages have wide uncertainty: the 95% interval for 16/26 is 43–78% (Wilson interval, computed in `REPORT.md`).
-- **The keyword rules** only cover the dev question shapes, and they answer wrongly more often than they refuse.
+- **The keyword rules** do not implement general natural-language understanding. Unsupported constraints produce a refusal, but a successful SELECT can still answer the wrong question; inspect its SQL and the measured failures. The historical test split is now used for regression review, not a fresh held-out benchmark.
 - **Model reachability in Docker.** Ollama on Windows listens on 127.0.0.1, so the `api` container in WSL could not reach it. In that setup `auto` falls back to the keyword rules. Point `LLM_BASE_URL` at a reachable endpoint to use a model from Docker.
 - **Security.** No login and no rate limiting. The app is meant to run locally, and `docker compose` publishes it on 127.0.0.1 only.
 

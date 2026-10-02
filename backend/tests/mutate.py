@@ -51,7 +51,7 @@ MUTANTS = [
     ("guard.py", r'''    ("instruction_override", r"\b(ignore|disregard|forget)\b.{0,40}\b(instructions?|rules|prompt)\b"),''', ""),
     # template query building
     ("templates.py", """return "'" + value.replace("'", "''") + "'\"""", """return "'" + value + "'\""""),
-    ("templates.py", "areas = [a for a in areas if a.lower() not in road.lower()]", "areas = areas"),
+    ("templates.py", "return _mask(q, self._stop_mentions(q) + _matches(q, self.c.roads))", "return q"),
     ("templates.py", 'return "SELECT region, count(*) AS n_stops FROM stops WHERE region IS NOT NULL GROUP BY region ORDER BY n_stops DESC"',
      'return "SELECT region, count(*) AS n_stops FROM stops GROUP BY region ORDER BY n_stops DESC"'),
     # spatial build
@@ -64,7 +64,7 @@ MUTANTS = [
     ("build.py", "coalesce(n.n, 0) * 10000.0 / a.residents", "coalesce(n.n, 0) * 1000.0 / a.residents"),
     # map layers
     ("geo.py", 'return _fc([{"type": "Feature", "geometry": point(lon, lat),', 'return _fc([{"type": "Feature", "geometry": point(lat, lon),'),
-    ("geo.py", 'point(r[idx["longitude"]], r[idx["latitude"]])', 'point(r[idx["latitude"]], r[idx["longitude"]])'),
+    ("geo.py", 'point(float(r[idx["longitude"]]), float(r[idx["latitude"]]))', 'point(float(r[idx["latitude"]]), float(r[idx["longitude"]]))'),
     ("geo.py", "order by o.weekday_trips desc limit ?", "order by o.weekday_trips asc limit ?"),
     ("geo.py", "    for a, b in LINE_PAIRS:\n", "    for a, b in ():\n"),
     # API
