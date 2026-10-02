@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState, type FormEvent } from "react";
+import { useCallback, useEffect, useRef, useState, type FormEvent } from "react";
 import { api, type Engine, type StopDetail } from "./api";
 import {
   COVERAGE_COLORS, COVERAGE_LABELS, DEMAND_COLORS, DEMAND_LABELS, formatCell, refusalMessage,
@@ -13,6 +13,7 @@ function AnswerPanel({ answer }: { answer: Answer }) {
     return (
       <section className="answer refused" aria-live="polite">
         <h2>Not answered</h2>
+        <p className="meta">{answer.question}</p>
         <p>{refusalMessage(answer.reason)}</p>
         <p className="meta">reason: <code>{answer.reason}</code>{answer.detail ? <> · {answer.detail}</> : null}</p>
       </section>
@@ -21,10 +22,14 @@ function AnswerPanel({ answer }: { answer: Answer }) {
   const shown = answer.rows.slice(0, MAX_TABLE_ROWS);
   return (
     <section className="answer" aria-live="polite">
+      <h2>Query result</h2>
+      <p className="meta">{answer.question}</p>
       <p className="meta">
         <b>{answer.row_count}</b> row{answer.row_count === 1 ? "" : "s"}{answer.truncated ? " (cut at the row limit)" : ""}
         {" · "}engine: {answer.engine} · {Math.round(answer.latency_ms)} ms
-        {answer.geojson ? ` · ${answer.geojson.features.length} on the map` : " · no map layer"}
+        {answer.geojson ? (answer.geojson.features.length < answer.row_count
+          ? ` · ${answer.geojson.features.length} of ${answer.row_count} rows mapped; other rows have no matching location.`
+          : ` · ${answer.geojson.features.length} on the map`) : " · no map layer"}
       </p>
       <details open>
         <summary>SQL that was run</summary>
@@ -45,19 +50,25 @@ function AnswerPanel({ answer }: { answer: Answer }) {
   );
 }
 
-function StopPanel({ stop, od, onClose }: { stop: StopDetail; od: FeatureCollection | null; onClose: () => void }) {
+function StopPanel({ code, stop, od, error, onClose }: {
+  code: string; stop: StopDetail | null; od: FeatureCollection | null; error: string | null; onClose: () => void;
+}) {
   return (
     <section className="stop">
       <div className="stop-head">
-        <h2>{stop.stop_name} <span className="code">{stop.stop_code}</span></h2>
+        <h2>{stop?.stop_name ?? "Stop"} <span className="code">{code}</span></h2>
         <button type="button" className="link" onClick={onClose} aria-label="Close stop details">✕</button>
       </div>
+      {error && <p className="error" role="alert">{error}</p>}
+      {!stop && !error && <p className="meta" role="status">Loading stop details…</p>}
+      {stop && <>
       <p className="meta">{stop.road_name} · {stop.subzone ?? "outside Singapore"}{stop.planning_area ? `, ${stop.planning_area}` : ""}</p>
       <dl>
         <dt>Weekday boardings (Aug 2026)</dt><dd>{formatCell(stop.weekday_boardings)}</dd>
         <dt>AM / PM peak share</dt><dd>{formatCell(stop.am_peak_share, "share")} / {formatCell(stop.pm_peak_share, "share")}</dd>
         <dt>Services ({stop.n_services})</dt><dd>{stop.services.join(", ") || "–"}</dd>
       </dl>
+      </>}
       {od && od.features.length > 0 && (
         <p className="meta">Orange lines: top {od.features.length} destinations by weekday trips, from{" "}
           {formatCell(od.features[od.features.length - 1].properties.weekday_trips)} to{" "}
@@ -93,34 +104,68 @@ export default function App() {
   const [answer, setAnswer] = useState<Answer | null>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [dataErrors, setDataErrors] = useState<string[]>([]);
+  const [selectedCode, setSelectedCode] = useState<string | null>(null);
+  const [stopError, setStopError] = useState<string | null>(null);
   const [stop, setStop] = useState<StopDetail | null>(null);
   const [od, setOd] = useState<FeatureCollection | null>(null);
   const [showStops, setShowStops] = useState(true);
   const [showCoverage, setShowCoverage] = useState(true);
+  const stopRequest = useRef(0), askRequest = useRef(0);
+  const stopController = useRef<AbortController | null>(null), askController = useRef<AbortController | null>(null);
 
   useEffect(() => {
-    api.stops().then(setStops).catch((e) => setError(String(e)));
-    api.coverage().then(setCoverage).catch((e) => setError(String(e)));
-    api.examples().then((x) => setExamples(x.questions)).catch(() => undefined);
+    const controller = new AbortController();
+    const loadError = (name: string, e: unknown) => {
+      if (!controller.signal.aborted) setDataErrors(previous => [...previous, `${name} could not be loaded: ${String(e)}`]);
+    };
+    api.stops(controller.signal).then(value => { if (!controller.signal.aborted) setStops(value); }).catch(e => loadError("Stops", e));
+    api.coverage(controller.signal).then(value => { if (!controller.signal.aborted) setCoverage(value); }).catch(e => loadError("Coverage", e));
+    api.examples(controller.signal).then(x => { if (!controller.signal.aborted) setExamples(x.questions); }).catch(e => loadError("Examples", e));
+    return () => {
+      controller.abort(); stopRequest.current++; askRequest.current++;
+      stopController.current?.abort(); askController.current?.abort();
+    };
+  }, []);
+
+  const closeStop = useCallback(() => {
+    stopRequest.current++; stopController.current?.abort(); stopController.current = null;
+    setSelectedCode(null); setStop(null); setOd(null); setStopError(null);
   }, []);
 
   const selectStop = useCallback((code: string) => {
-    Promise.all([api.stop(code), api.stopOd(code)])
-      .then(([s, o]) => { setStop(s); setOd(o); })
-      .catch((e) => setError(String(e)));
+    const request = ++stopRequest.current;
+    stopController.current?.abort();
+    const controller = new AbortController(); stopController.current = controller;
+    setSelectedCode(code); setStop(null); setOd(null); setStopError(null);
+    Promise.all([api.stop(code, controller.signal), api.stopOd(code, 15, controller.signal)])
+      .then(([s, o]) => {
+        if (request === stopRequest.current && !controller.signal.aborted) { setStop(s); setOd(o); }
+      })
+      .catch((e) => {
+        if (request === stopRequest.current && !controller.signal.aborted) setStopError(`Stop ${code} could not be loaded: ${String(e)}`);
+      });
   }, []);
+
+  const clearResults = () => {
+    askRequest.current++; askController.current?.abort(); askController.current = null;
+    setBusy(false); setAnswer(null); setError(null); closeStop();
+  };
 
   const submit = async (e?: FormEvent, q = question) => {
     e?.preventDefault();
-    if (!q.trim() || busy) return;
+    if (!q.trim() || askController.current) return;
+    const request = ++askRequest.current;
+    const controller = new AbortController(); askController.current = controller;
     setBusy(true);
-    setError(null);
+    setError(null); setAnswer(null); closeStop();
     try {
-      setAnswer(await api.ask(q, engine));
+      const result = await api.ask(q, engine, controller.signal);
+      if (request === askRequest.current && !controller.signal.aborted) setAnswer(result);
     } catch (err) {
-      setError(`The request failed: ${String(err)}`);
+      if (request === askRequest.current && !controller.signal.aborted) setError(`The request failed: ${String(err)}`);
     } finally {
-      setBusy(false);
+      if (request === askRequest.current) { askController.current = null; setBusy(false); }
     }
   };
 
@@ -145,6 +190,7 @@ export default function App() {
               </select>
             </label>
             <button type="submit" disabled={busy || !question.trim()}>{busy ? "Working…" : "Ask"}</button>
+            <button type="button" className="link" onClick={clearResults} disabled={!busy && !answer && !selectedCode && !error}>Clear results</button>
           </div>
         </form>
         {examples.length > 0 && !answer && (
@@ -156,8 +202,9 @@ export default function App() {
           </div>
         )}
         {error && <p className="error" role="alert">{error}</p>}
+        {dataErrors.map(message => <p className="error" role="alert" key={message}>{message}</p>)}
         {answer && <AnswerPanel answer={answer} />}
-        {stop && <StopPanel stop={stop} od={od} onClose={() => { setStop(null); setOd(null); }} />}
+        {selectedCode && <StopPanel code={selectedCode} stop={stop} od={od} error={stopError} onClose={closeStop} />}
         <div className="toggles">
           <label><input type="checkbox" checked={showStops} onChange={(e) => setShowStops(e.target.checked)} /> Stops by demand</label>
           <label><input type="checkbox" checked={showCoverage} onChange={(e) => setShowCoverage(e.target.checked)} /> Coverage gaps</label>

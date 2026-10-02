@@ -137,6 +137,7 @@ const REFUSALS: Record<string, string> = {
   model_declined: "The model judged that the data here cannot answer this question.",
   invalid_after_repair: "The generated SQL failed the safety checks or did not run, even after one repair attempt.",
   no_template: "The keyword rules do not cover this question. Try the model, or rephrase.",
+  template_unsupported_constraint: "The keyword rules cannot apply all the conditions in this question. Try rephrasing it or using the language model.",
   llm_unavailable: "The language model could not be reached. Try the keyword engine.",
   question_too_long: "The question is too long.",
   empty_question: "Type a question first.",
@@ -150,6 +151,7 @@ export function refusalMessage(reason: string | null | undefined): string {
 
 /** Checks the shape of an /api/ask response; throws with a clear message if the server sent something else. */
 export function parseAnswer(data: unknown): Answer {
+  if (!data || typeof data !== "object" || Array.isArray(data)) throw new Error("Invalid answer data");
   const d = data as Record<string, unknown>;
   const required = ["question", "engine", "status", "row_count", "columns", "rows"];
   for (const k of required) {
@@ -157,8 +159,35 @@ export function parseAnswer(data: unknown): Answer {
   }
   if (d.status !== "answered" && d.status !== "refused") throw new Error(`unknown status ${String(d.status)}`);
   if (!Array.isArray(d.rows) || !Array.isArray(d.columns)) throw new Error("rows and columns must be arrays");
+  if (typeof d.question !== "string" || typeof d.engine !== "string" || !Number.isInteger(d.row_count) || Number(d.row_count) < 0
+    || d.row_count !== d.rows.length || !d.columns.every(column => typeof column === "string")
+    || !d.rows.every(row => Array.isArray(row) && row.length === (d.columns as unknown[]).length)) {
+    throw new Error("Invalid answer table data");
+  }
   if (d.status === "answered" && typeof d.sql !== "string") throw new Error("an answered question must include its SQL");
-  return d as unknown as Answer;
+  if ((d.truncated !== undefined && typeof d.truncated !== "boolean")
+    || (d.latency_ms !== undefined && (typeof d.latency_ms !== "number" || !Number.isFinite(d.latency_ms) || d.latency_ms < 0))
+    || [d.reason, d.detail].some(value => value != null && typeof value !== "string")) throw new Error("Invalid answer metadata");
+  return { ...d, truncated: d.truncated ?? false, latency_ms: d.latency_ms ?? 0,
+    geojson: d.geojson == null ? null : parseFeatureCollection(d.geojson),
+    reason: d.reason ?? null, detail: d.detail ?? null, attempts: d.attempts ?? [],
+  } as unknown as Answer;
+}
+
+/** Validate before passing server data to React or MapLibre, where a bad shape otherwise breaks rendering. */
+export function parseFeatureCollection(data: unknown): FeatureCollection {
+  const record = (value: unknown): value is Record<string, unknown> => !!value && typeof value === "object" && !Array.isArray(value);
+  const coordinates = (value: unknown, depth: number): boolean => Array.isArray(value) && (depth === 0
+    ? value.length >= 2 && value.every(number => typeof number === "number" && Number.isFinite(number))
+    : value.length > 0 && value.every(child => coordinates(child, depth - 1)));
+  const depths: Record<string, number> = { Point: 0, LineString: 1, Polygon: 2, MultiLineString: 2, MultiPolygon: 3 };
+  if (!record(data) || data.type !== "FeatureCollection" || !Array.isArray(data.features)
+    || !data.features.every(feature => record(feature) && feature.type === "Feature" && record(feature.properties)
+      && record(feature.geometry) && typeof feature.geometry.type === "string"
+      && Object.hasOwn(depths, feature.geometry.type) && coordinates(feature.geometry.coordinates, depths[feature.geometry.type]))) {
+    throw new Error("Invalid map data: expected a GeoJSON feature collection with numeric coordinates");
+  }
+  return data as unknown as FeatureCollection;
 }
 
 export const STOP_CODE_RE = /^\d{5}$/;

@@ -110,3 +110,20 @@ def test_database_still_intact_after_attacks(client_for):
     with c:
         c.post("/api/ask", json={"question": "Stops?", "engine": "llm"})
         assert c.get("/api/health").json()["stops"] == 9
+
+
+def test_outer_join_answer_keeps_null_rows_and_maps_only_known_pairs(client_for):
+    sql = ("SELECT s.stop_code AS origin_stop, o.destination_stop FROM stops s "
+           "LEFT JOIN od_stop_flows o ON s.stop_code = o.origin_stop ORDER BY s.stop_code")
+    c, _ = client_for(sql)
+    with c:
+        response = c.post("/api/ask", json={"question": "Show destinations for every stop, including stops without flows.",
+                                          "engine": "llm"})
+    assert response.status_code == 200
+    answer = response.json()
+    assert answer["status"] == "answered"
+    assert answer["row_count"] == len(answer["rows"])
+    assert any(row[1] is None for row in answer["rows"])
+    mapped = [(f["properties"]["origin_stop"], f["properties"]["destination_stop"])
+              for f in answer["geojson"]["features"]]
+    assert sorted(mapped) == sorted(tuple(r) for r in answer["rows"] if r[1] is not None)
