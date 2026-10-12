@@ -1,0 +1,52 @@
+{
+  "review_date": "2026-10-03",
+  "baseline_commit": "cad5008607f9a09114cef49c46273570037ec912",
+  "mode": "template only; no model endpoint calls",
+  "data_sha256": "c4bb827ffa47ef9f7889b98178ed9ebdd6d6358402f11521b49dd5ca272cebc0",
+  "source": {
+    "source_repository": "https://github.com/LUOaini1213/sg-bus-network-monitor",
+    "source_commit": "243403c15be1738bcb9f9cacb2bac7960b32003e",
+    "od_month": "2026-08",
+    "od_weekdays": 20,
+    "rows": {
+      "stops": 5209,
+      "stop_demand": 5182,
+      "services": 802,
+      "route_stops": 26842,
+      "od_stop_flows": 334516,
+      "od_area_flows": 1408,
+      "planning_areas": 55,
+      "subzones": 332,
+      "corridor_links": 7845,
+      "stop_changes": 2932
+    },
+    "prepared": "2026-09-27"
+  },
+  "questions_sha256": {
+    "eval/questions.jsonl": "26900afcdd49d169be0112c230ef14f45d86bcbf1b30c2d2bdd315982d591911",
+    "eval/heldout_2026-09-28.jsonl": "8ed1de739e7a47c5571f84f6f8bef6a14c658247c6739ee6be16531654375826"
+  },
+  "revised_backend_sha256": {
+    "backend/app/__init__.py": "c459af9bb696009de5cc45b7886da5353001a5fb3d23d1504a7b01b50ea8578f",
+    "backend/app/ask.py": "0bc2ea2ee56849c764a73dd0bc0046e9fe67a63fe259190579787caa51f4592f",
+    "backend/app/build.py": "a5b75d58edcb66ee33b2a29e5a9c4fe63c19422a6a65bfb43cee6bd001e40330",
+    "backend/app/config.py": "ee9f22bbd53dbda42eb90592ccbcf958812d5f257dde7a9ddc673d2161404e7a",
+    "backend/app/db.py": "dc68c3494fb80e0c24231de37843a89fc6eea2ced70176c23f531ca58cc09ea1",
+    "backend/app/geo.py": "ee27eb482e27deeffdb685cb8eb346c1ebbaa5f95f665622c5795f0bea5e238d",
+    "backend/app/guard.py": "d3d7828fdfec512341e67d9cae3933490d7967f2076081bad995b05c797329e9",
+    "backend/app/llm.py": "7ec9d2781b518aa4ee30cc7e6be2519b8c4c816a03a1791605e98c81d57ed048",
+    "backend/app/main.py": "3993e45f5705d7747bd7cee98f34fa10e78aefd81634ef5332bd66fa39ce7837",
+    "backend/app/schema.py": "e589c5bcc3634b8cdf3762f014cb33e76c4100dd2a0ac83f000e048633e1b637",
+    "backend/app/templates.py": "17bf5d559ce8acc44107dda8b60bfe99614c6f678fb1cafebc8d6afa55defb1d",
+    "backend/app/validator.py": "9553b32fe141fcd99df97614d4d2fb700919689d877b4932efc9d7ed244e51b2"
+  },
+  "commands": [
+    "TRANSIT_DB=<full database> python eval/run_eval.py --engines template --tag review_20261003",
+    "TRANSIT_DB=<full database> python eval/run_eval.py --engines template --questions eval/heldout_2026-09-28.jsonl --tag review_reused_heldout_20261003"
+  ],
+  "limits": [
+    "Known questions reused during development, not independent held-out evidence.",
+    "The 24 ordinary reused prompts have no gold SQL; acceptance is not correctness.",
+    "Raw source data and database are not redistributed."
+  ]
+}

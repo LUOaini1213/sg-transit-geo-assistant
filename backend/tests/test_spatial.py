@@ -156,6 +156,53 @@ def test_result_layer_lines_from_stop_pairs(db):
     assert fc["features"][0]["geometry"]["type"] == "LineString"
 
 
+def test_result_layer_keeps_valid_lines_when_outer_join_has_missing_stops(db):
+    rows = [["10011", "20011", 280.0], ["10012", None, None], [None, "20012", 1.0]]
+    fc = geo.result_layer(db, ["origin_stop", "destination_stop", "weekday_trips"], rows)
+    assert len(fc["features"]) == 1
+    assert fc["features"][0]["properties"]["weekday_trips"] == 280.0
+    assert rows[1] == ["10012", None, None]  # map filtering never removes table rows
+
+
+@pytest.mark.parametrize("lat,lon", [("north", 103.8), (1.35, "east"), (True, 103.8),
+                                    (91.0, 103.8), (1.35, 181.0), (float("nan"), 103.8),
+                                    (1.35, float("inf")), (None, 103.8), ([1.35], 103.8),
+                                    (1.35, {"longitude": 103.8})])
+def test_result_layer_omits_unmappable_coordinates_without_losing_valid_points(db, lat, lon):
+    fc = geo.result_layer(db, ["latitude", "longitude"], [[lat, lon], [1.35, 103.8]])
+    assert [f["geometry"]["coordinates"] for f in fc["features"]] == [[103.8, 1.35]]
+    json.dumps(fc, allow_nan=False)
+
+
+def test_result_layer_mixed_identifier_types_do_not_crash_map_lookup(db):
+    fc = geo.result_layer(db, ["stop_code"], [["10011"], [10012], [None], [["10012"]]])
+    assert len(fc["features"]) == 1
+    assert fc["features"][0]["properties"] == {"stop_code": "10011"}
+    fc = geo.result_layer(db, ["planning_area"], [["ALPHA"], [3], [None], [{"area": "BETA"}]])
+    assert len(fc["features"]) == 1
+    fc = geo.result_layer(db, ["subzone"], [["ALPHA NORTH"], [3], [None], [["ALPHA SOUTH"]]])
+    assert len(fc["features"]) == 1
+    fc = geo.result_layer(db, ["from_stop", "to_stop"],
+                          [["10011", "20011"], [None, ["20012"]], [10012, "20011"]])
+    assert len(fc["features"]) == 1
+
+
+def test_result_layer_accepts_numeric_coordinates_at_geographic_bounds(db):
+    from decimal import Decimal
+
+    fc = geo.result_layer(db, ["latitude", "longitude"],
+                          [[90, -180], [-90, 180], [Decimal("1.35"), Decimal("103.8")]])
+    assert [f["geometry"]["coordinates"] for f in fc["features"]] == [
+        [-180.0, 90.0], [180.0, -90.0], [103.8, 1.35]]
+
+
+def test_result_layer_returns_no_map_for_unlocated_rows_but_preserves_table(db):
+    rows = [[None, "10011"], ["missing", "99999"]]
+    assert geo.result_layer(db, ["origin_stop", "destination_stop"], rows) is None
+    assert rows == [[None, "10011"], ["missing", "99999"]]
+
+
+
 def test_result_layer_polygons(db):
     fc = geo.result_layer(db, ["subzone", "coverage_walk_400m"], [["ALPHA NORTH", 0.63]])
     ring = fc["features"][0]["geometry"]["coordinates"][0]

@@ -13,7 +13,7 @@ import duckdb
 
 from . import geo, guard, llm
 from .db import Database, QueryTimeout, ResultTooLarge
-from .templates import TemplateEngine
+from .templates import TemplateEngine, TemplateRefusal
 from .validator import Refusal, extract_sql, validate
 
 
@@ -75,7 +75,11 @@ class Assistant:
 
     def _via_template(self, ans: Answer) -> Answer:
         ans.engine = "template"
-        sql = self.templates.to_sql(ans.question)
+        try:
+            sql = self.templates.to_sql(ans.question)
+        except TemplateRefusal as exc:
+            ans.attempts.append({"engine": "template", "error": str(exc)})
+            return self._refuse(ans, exc.code, str(exc))
         if sql is None:
             return self._refuse(ans, "no_template", "The keyword rules do not cover this question.")
         ans.attempts.append({"engine": "template", "sql": sql})
@@ -142,5 +146,7 @@ class Assistant:
             fallback = self._via_template(Answer(question=ans.question, engine="template", status="refused",
                                                  attempts=list(out.attempts)))
             if fallback.status == "answered":
+                return fallback
+            if fallback.reason == TemplateRefusal.code:
                 return fallback
         return out

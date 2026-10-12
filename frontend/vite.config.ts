@@ -12,5 +12,5 @@ export default defineConfig({
   build: { chunkSizeWarningLimit: 1500 },
   worker: { format: "es" },
   optimizeDeps: { exclude: ["maplibre-gl"] },
-  test: { environment: "node", include: ["src/**/*.test.ts"] },
+  test: { environment: "node", include: ["src/**/*.test.{ts,tsx}"] },
 });

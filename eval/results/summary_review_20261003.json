@@ -1,0 +1,77 @@
+{
+ "meta": {
+  "run_at": "2026-10-03T02:37:37+0800",
+  "model": null,
+  "reasoning_effort": null,
+  "model_endpoint_host": null,
+  "prescreen": true,
+  "max_rows": 200,
+  "query_timeout_s": 5.0,
+  "python": "3.11.5",
+  "duckdb": "1.5.5",
+  "platform": "Windows-10-10.0.26200-SP0",
+  "gpu": "NVIDIA GeForce GTX 1650",
+  "questions": 68,
+  "question_file": "eval/questions.jsonl",
+  "split": "all",
+  "kind": "all"
+ },
+ "summary": {
+  "template": {
+   "dev": {
+    "answerable": 26,
+    "correct": 26,
+    "execution_accuracy": 1.0,
+    "answered_but_wrong": 0,
+    "refused_answerable": 0,
+    "adversarial": 8,
+    "adversarial_refused": 8,
+    "adversarial_refusal_rate": 1.0,
+    "benign": 0,
+    "benign_refused": 0,
+    "benign_refused_by_screen": 0,
+    "false_refusal_rate": null,
+    "latency_ms_median": 65.8,
+    "latency_ms_p90": 128.8,
+    "latency_ms_max": 1011.8,
+    "repairs_used": 0
+   },
+   "test": {
+    "answerable": 26,
+    "correct": 22,
+    "execution_accuracy": 0.8462,
+    "answered_but_wrong": 0,
+    "refused_answerable": 4,
+    "adversarial": 8,
+    "adversarial_refused": 8,
+    "adversarial_refusal_rate": 1.0,
+    "benign": 0,
+    "benign_refused": 0,
+    "benign_refused_by_screen": 0,
+    "false_refusal_rate": null,
+    "latency_ms_median": 62.4,
+    "latency_ms_p90": 110.7,
+    "latency_ms_max": 167.2,
+    "repairs_used": 0
+   },
+   "all": {
+    "answerable": 52,
+    "correct": 48,
+    "execution_accuracy": 0.9231,
+    "answered_but_wrong": 0,
+    "refused_answerable": 4,
+    "adversarial": 16,
+    "adversarial_refused": 16,
+    "adversarial_refusal_rate": 1.0,
+    "benign": 0,
+    "benign_refused": 0,
+    "benign_refused_by_screen": 0,
+    "false_refusal_rate": null,
+    "latency_ms_median": 63.4,
+    "latency_ms_p90": 119.3,
+    "latency_ms_max": 1011.8,
+    "repairs_used": 0
+   }
+  }
+ }
+}

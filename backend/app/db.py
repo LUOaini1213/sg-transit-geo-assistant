@@ -17,6 +17,9 @@ class ResultTooLarge(Exception):
 # The row limit alone does not bound the size of an answer: one generated string column can be megabytes long.
 MAX_CELL_CHARS = 10_000
 MAX_RESULT_BYTES = 5_000_000
+# DuckDB settings are shared by connections to the same file. Serialize our initialization
+# so one instance cannot lock the configuration halfway through another instance's setup.
+_INITIALIZE_LOCK = threading.Lock()
 
 
 def _size(v) -> int:
@@ -51,15 +54,32 @@ class Database:
         self.path = path
         con = duckdb.connect(path, read_only=True)
         try:
-            con.execute("LOAD spatial")
-        except duckdb.Error:
-            con.execute("INSTALL spatial")
-            con.execute("LOAD spatial")
-        # After this the connection cannot read or write files or URLs, and the settings cannot be changed back.
-        con.execute("SET enable_external_access = false")
-        con.execute("SET memory_limit = '1GB'")
-        con.execute("SET threads = 2")
-        con.execute("SET lock_configuration = true")
+            with _INITIALIZE_LOCK:
+                try:
+                    con.execute("LOAD spatial")
+                except duckdb.Error:
+                    con.execute("INSTALL spatial")
+                    con.execute("LOAD spatial")
+                locked, safe = con.execute("""
+                    SELECT current_setting('lock_configuration'),
+                           NOT current_setting('enable_external_access')
+                           AND current_setting('memory_limit') = format_bytes(1000000000)
+                           AND current_setting('threads') = 2
+                """).fetchone()
+                if locked:
+                    # A second connection inherits the first one's immutable settings. Verify
+                    # those limits instead of trying to set (or unlock) them again.
+                    if not safe:
+                        raise duckdb.InvalidInputException("Database configuration is locked without the required safety limits")
+                else:
+                    # Disable file/URL access and impose resource limits before locking them.
+                    con.execute("SET enable_external_access = false")
+                    con.execute("SET memory_limit = '1GB'")
+                    con.execute("SET threads = 2")
+                    con.execute("SET lock_configuration = true")
+        except BaseException:
+            con.close()
+            raise
         self._con = con
 
     def close(self):
