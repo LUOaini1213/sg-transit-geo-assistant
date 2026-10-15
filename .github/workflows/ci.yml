@@ -59,7 +59,7 @@ jobs:
       - name: Security headers on the page and the proxied API
         run: |
           for path in / /api/health; do
-            h=$(curl -fsSI "http://localhost:8080$path")
+            h=$(curl -fsS -D - -o /dev/null "http://localhost:8080$path")  # GET: the API answers HEAD with 405
             for name in content-security-policy x-content-type-options x-frame-options referrer-policy; do
               echo "$h" | grep -qi "^$name:" || { echo "missing $name on $path"; exit 1; }
             done
