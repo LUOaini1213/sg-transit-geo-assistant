@@ -7,4 +7,4 @@ if [ ! -f "${TRANSIT_DB:-/data/transit.duckdb}" ]; then
   python -m backend.app.build data/fixture /tmp/fixture.duckdb
   export TRANSIT_DB=/tmp/fixture.duckdb
 fi
-exec uvicorn backend.app.main:app --host 0.0.0.0 --port 8000
+exec uvicorn backend.app.main:app --host 0.0.0.0 --port 8000 --no-server-header
