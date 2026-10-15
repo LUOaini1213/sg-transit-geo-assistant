@@ -11,8 +11,8 @@ jobs:
   backend:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
         with:
           python-version: "3.12"
           cache: pip
@@ -32,8 +32,8 @@ jobs:
       run:
         working-directory: frontend
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
         with:
           node-version: "24"
           cache: npm
@@ -45,7 +45,7 @@ jobs:
   docker:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
       - name: Build both images
         run: docker compose build
       - name: Start the stack on the fixture and call it through nginx
@@ -56,5 +56,51 @@ jobs:
           curl -fs -X POST http://localhost:8080/api/ask -H 'Content-Type: application/json' \
             -d '{"question": "How many bus stops are there in Alpha?", "engine": "template"}' | tee answer.json
           python3 -c "import json; a = json.load(open('answer.json')); assert a['status'] == 'answered' and a['rows'] == [[5]], a"
+      - name: Security headers on the page and the proxied API
+        run: |
+          for path in / /api/health; do
+            h=$(curl -fsSI "http://localhost:8080$path")
+            for name in content-security-policy x-content-type-options x-frame-options referrer-policy; do
+              echo "$h" | grep -qi "^$name:" || { echo "missing $name on $path"; exit 1; }
+            done
+            ! echo "$h" | grep -qiE '^server: .*[0-9]' || { echo "server version disclosed on $path"; exit 1; }
+          done
+      - name: Image CVEs (Trivy; fixable HIGH and CRITICAL fail the job)
+        run: |
+          for img in sg-transit-geo-assistant-api sg-transit-geo-assistant-web; do
+            docker run --rm -v /var/run/docker.sock:/var/run/docker.sock "$TRIVY" image --quiet \
+              --scanners vuln --severity HIGH,CRITICAL --ignore-unfixed --exit-code 1 "$img"
+          done
+        env:
+          TRIVY: aquasec/trivy:0.76.0@sha256:2416d1f74045b57274df1a340eee6b510cacd73c66a6ccb8da092b117eb7d222
       - if: always()
         run: docker compose logs && docker compose down
+
+  security:
+    runs-on: ubuntu-latest
+    env:
+      TRIVY: aquasec/trivy:0.76.0@sha256:2416d1f74045b57274df1a340eee6b510cacd73c66a6ccb8da092b117eb7d222
+      GITLEAKS: zricethezav/gitleaks:v8.30.1@sha256:c00b6bd0aeb3071cbcb79009cb16a60dd9e0a7c60e2be9ab65d25e6bc8abbb7f
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          fetch-depth: 0  # gitleaks reads every commit
+      - name: Secrets in git history (gitleaks)
+        run: docker run --rm -v "$PWD:/repo" "$GITLEAKS" git /repo --redact --no-banner
+      - name: Python dependency CVEs (pip-audit)
+        run: pipx run pip-audit==2.10.1 --progress-spinner off -r backend/requirements.txt -r backend/requirements-dev.txt
+      - name: npm dependency CVEs (high and critical fail the job)
+        working-directory: frontend
+        run: npm audit --package-lock-only --audit-level=high
+      - name: SAST (Semgrep; ERROR-severity findings fail the job)
+        # sqlalchemy-execute-raw-query is excluded: the project has no SQLAlchemy, and the formatted SQL it matches is
+        # the offline build script reading its own staging files. Model-written SQL goes through backend/app/validator.py.
+        run: >
+          pipx run semgrep==1.181.0 scan --metrics=off --error --severity ERROR
+          --config p/default --config p/owasp-top-ten --config p/python --config p/typescript --config p/dockerfile
+          --config p/secrets
+          --exclude-rule python.sqlalchemy.security.sqlalchemy-execute-raw-query.sqlalchemy-execute-raw-query
+      - name: Dependencies, Dockerfiles and compose (Trivy; fixable HIGH and CRITICAL fail the job)
+        run: >
+          docker run --rm -v "$PWD:/src" -w /src "$TRIVY" fs --quiet --scanners vuln,misconfig,secret
+          --severity HIGH,CRITICAL --ignore-unfixed --exit-code 1 --skip-dirs frontend/node_modules .
