@@ -27,7 +27,7 @@ services:
   web:
     build: ./frontend
     ports:
-      - "127.0.0.1:8080:80"   # no login and no rate limit: only this machine can reach it
+      - "127.0.0.1:8080:8080"   # no login and no rate limit: only this machine can reach it
     security_opt:
       - no-new-privileges:true
     depends_on:
