@@ -8,7 +8,10 @@ WORKDIR /app
 COPY backend/requirements.txt backend/requirements.txt
 RUN pip install --no-cache-dir -r backend/requirements.txt \
  # fetch the DuckDB spatial extension at build time so the container needs no network at run time
- && python -c "import duckdb; duckdb.connect().execute('INSTALL spatial')"
+ && python -c "import duckdb; duckdb.connect().execute('INSTALL spatial')" \
+ # pip is not used at run time; the base image's pip 25.0.1 has fixable CVEs (Trivy: 5 MEDIUM, 1 LOW) and the
+ # current pip vendors urllib3 2.7.0 and msgpack 1.1.2, which have their own, so it is removed from the image
+ && python -m pip uninstall -y pip
 
 COPY backend/app backend/app
 COPY backend/__init__.py backend/__init__.py
