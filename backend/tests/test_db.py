@@ -5,7 +5,7 @@ from threading import Barrier
 import duckdb
 import pytest
 
-from backend.app.db import Database, QueryTimeout, ResultTooLarge
+from backend.app.db import Database, QueryTimeout, ResultTooLarge, UnsupportedResult
 
 
 def test_two_live_instances_share_the_locked_read_only_database(db, fixture_db_path, tmp_path):
@@ -188,3 +188,69 @@ def test_oversized_result_is_refused(db):
 def test_normal_result_fits(db):
     r = db.query("SELECT repeat('x', 100) AS s FROM range(50)", max_rows=200)
     assert len(r.rows) == 50 and not r.truncated
+
+
+@pytest.mark.parametrize("sql", [
+    "SELECT ST_Point(x_m, y_m) FROM stops",
+    "SELECT list(ST_Point(x_m, y_m)) FROM stops",
+    r"SELECT list(CAST('\xFF' AS BLOB)) FROM stops",
+    r"SELECT {'nested': [CAST('\xFF' AS BLOB)]}",
+])
+def test_binary_results_are_explicitly_refused_at_any_depth(db, sql):
+    with pytest.raises(UnsupportedResult, match="binary results"):
+        db.query(sql)
+    assert db.query("SELECT count(*) FROM stops").rows == [[9]]
+
+
+def test_nested_scalar_aggregates_remain_usable(db):
+    from decimal import Decimal
+
+    result = db.query("""
+        SELECT list(stop_code ORDER BY stop_code),
+               list(CAST('2026-10-19' AS DATE)),
+               list(CAST('NaN' AS DOUBLE)), list(CAST('Infinity' AS DOUBLE)),
+               list(CAST('1.250' AS DECIMAL(10, 3))),
+               {'codes': ['10011', '20011'], 'count': 2},
+               CAST('12:30:00' AS INTERVAL)
+        FROM stops
+    """)
+    row = result.rows[0]
+    assert len(row[0]) == 9 and row[0][0] == "10011"
+    assert row[1] == ["2026-10-19"] * 9
+    assert row[2] == row[3] == [None] * 9
+    assert row[4] == [Decimal("1.250")] * 9
+    assert row[5] == {"codes": ["10011", "20011"], "count": 2}
+    assert row[6].total_seconds() == 45000
+
+
+def test_nested_string_cannot_bypass_cell_limit(db):
+    with pytest.raises(ResultTooLarge, match="10,001 characters"):
+        db.query("SELECT list(repeat('x', 10001)) FROM stops")
+
+
+def test_nested_utf8_values_count_actual_json_bytes(db, monkeypatch):
+    # Nine two-character values fit the old repr-based budget but exceed 64 UTF-8 bytes.
+    monkeypatch.setattr("backend.app.db.MAX_RESULT_BYTES", 64)
+    with pytest.raises(ResultTooLarge, match="64 bytes"):
+        db.query("SELECT list('公交') FROM stops")
+    assert db.query("SELECT list('bus') FROM stops").rows == [[["bus"] * 9]]
+
+
+def test_numeric_map_keys_do_not_get_silently_stringified(db):
+    with pytest.raises(UnsupportedResult, match="string keys"):
+        db.query("SELECT CAST(CAST('{\"1\": \"bus\"}' AS JSON) AS MAP(INTEGER, VARCHAR))")
+
+
+def test_excessive_result_nesting_is_refused(db):
+    from backend.app.db import MAX_RESULT_DEPTH
+
+    nested = "[" * (MAX_RESULT_DEPTH + 1) + "1" + "]" * (MAX_RESULT_DEPTH + 1)
+    with pytest.raises(UnsupportedResult, match="nesting"):
+        db.query(f"SELECT {nested}")
+
+
+def test_unknown_result_type_is_controlled():
+    from backend.app.db import _clean, _ResultBudget
+
+    with pytest.raises(UnsupportedResult, match="unsupported result type: object"):
+        _clean({"nested": [object()]}, _ResultBudget())

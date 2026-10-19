@@ -2,8 +2,12 @@
 import math
 import threading
 from dataclasses import dataclass
+from datetime import date, datetime, time, timedelta
+from decimal import Decimal
+from uuid import UUID
 
 import duckdb
+from pydantic_core import to_json
 
 
 class QueryTimeout(Exception):
@@ -14,20 +18,27 @@ class ResultTooLarge(Exception):
     pass
 
 
+class UnsupportedResult(Exception):
+    """The query returned a value that the JSON answer cannot faithfully represent."""
+
+
 # The row limit alone does not bound the size of an answer: one generated string column can be megabytes long.
 MAX_CELL_CHARS = 10_000
 MAX_RESULT_BYTES = 5_000_000
+MAX_RESULT_DEPTH = 64
 # DuckDB settings are shared by connections to the same file. Serialize our initialization
 # so one instance cannot lock the configuration halfway through another instance's setup.
 _INITIALIZE_LOCK = threading.Lock()
 
 
-def _size(v) -> int:
-    if isinstance(v, (str, bytes, bytearray)):
-        return len(v)
-    if isinstance(v, (list, tuple, dict)):
-        return len(repr(v))
-    return 16
+@dataclass
+class _ResultBudget:
+    total: int = 0
+
+    def add(self, n: int):
+        self.total += n
+        if self.total > MAX_RESULT_BYTES:
+            raise ResultTooLarge(f"result over {MAX_RESULT_BYTES:,} bytes")
 
 
 @dataclass
@@ -37,13 +48,46 @@ class QueryResult:
     truncated: bool  # more rows existed than max_rows
 
 
-def _clean(v):
-    if isinstance(v, float) and (math.isnan(v) or math.isinf(v)):
-        return None
+def _clean(v, budget: _ResultBudget, depth: int = 0):
+    """Normalize nested values before a result is accepted, accounting for JSON UTF-8 bytes.
+
+    Binary geometry is not a JSON value. Refuse it explicitly so the model can
+    select scalar coordinates instead of silently replacing results with NULL.
+    Decimal/interval values retain the existing Pydantic JSON representation.
+    """
+    if depth > MAX_RESULT_DEPTH:
+        raise UnsupportedResult(f"result nesting exceeds {MAX_RESULT_DEPTH} levels")
+    if isinstance(v, (list, tuple)):
+        budget.add(2 + max(0, len(v) - 1))  # brackets and commas
+        return [_clean(item, budget, depth + 1) for item in v]
+    if isinstance(v, dict):
+        budget.add(2 + max(0, len(v) - 1))
+        out = {}
+        for key, item in v.items():
+            if not isinstance(key, str):
+                raise UnsupportedResult("result maps require string keys; select scalar key/value columns instead")
+            _clean(key, budget, depth + 1)
+            budget.add(1)  # colon
+            out[key] = _clean(item, budget, depth + 1)
+        return out
     if isinstance(v, (bytes, bytearray)):
-        return None
-    if hasattr(v, "isoformat"):
-        return v.isoformat()
+        raise UnsupportedResult("binary results are unsupported; select scalar values such as ST_X/ST_Y instead")
+    if isinstance(v, float) and not math.isfinite(v):
+        v = None
+    elif isinstance(v, Decimal) and not v.is_finite():
+        v = None
+    elif isinstance(v, (datetime, date, time)):
+        v = v.isoformat()
+    elif isinstance(v, UUID):
+        v = str(v)
+    if isinstance(v, str) and len(v) > MAX_CELL_CHARS:
+        raise ResultTooLarge(f"a value of {len(v):,} characters (limit {MAX_CELL_CHARS:,})")
+    if not isinstance(v, (type(None), bool, int, float, str, Decimal, timedelta)):
+        raise UnsupportedResult(f"unsupported result type: {type(v).__name__}")
+    try:
+        budget.add(len(to_json(v)))
+    except (ValueError, TypeError, OverflowError) as exc:
+        raise UnsupportedResult("result value cannot be represented as JSON") from exc
     return v
 
 
@@ -92,26 +136,22 @@ class Database:
         try:
             cur.execute(sql, params or [])
             columns = [d[0] for d in cur.description]
-            rows, total = [], 0
+            rows, budget = [], _ResultBudget()
+            budget.add(2)  # outer row-array brackets
             while len(rows) <= max_rows:  # one row at a time, so an oversized answer is refused before it piles up
                 row = cur.fetchone()
                 if row is None:
                     break
-                for v in row:
-                    n = _size(v)
-                    if isinstance(v, str) and n > MAX_CELL_CHARS:
-                        raise ResultTooLarge(f"a value of {n:,} characters (limit {MAX_CELL_CHARS:,})")
-                    total += n
-                if total > MAX_RESULT_BYTES:
-                    raise ResultTooLarge(f"result over {MAX_RESULT_BYTES:,} bytes")
-                rows.append(row)
+                if rows:
+                    budget.add(1)
+                rows.append(_clean(row, budget))
         except duckdb.InterruptException:
             raise QueryTimeout(f"query exceeded {timeout_s:g} s") from None
         finally:
             timer.cancel()
             cur.close()
         truncated = len(rows) > max_rows
-        return QueryResult(columns, [[_clean(v) for v in r] for r in rows[:max_rows]], truncated)
+        return QueryResult(columns, rows[:max_rows], truncated)
 
     def scalar_rows(self, sql: str, params=None) -> list[tuple]:
         """Trusted internal queries (layers, lookups). Still read-only."""

@@ -12,7 +12,7 @@ from dataclasses import asdict, dataclass, field
 import duckdb
 
 from . import geo, guard, llm
-from .db import Database, QueryTimeout, ResultTooLarge
+from .db import Database, QueryTimeout, ResultTooLarge, UnsupportedResult
 from .templates import TemplateEngine, TemplateRefusal
 from .validator import Refusal, extract_sql, validate
 
@@ -59,6 +59,8 @@ class Assistant:
             raise _Unusable("timeout", str(e)) from None
         except ResultTooLarge as e:
             raise _Unusable("result_too_large", str(e)) from None
+        except UnsupportedResult as e:
+            raise _Unusable("unsupported_result", str(e)) from None
         except duckdb.Error as e:
             raise _Unusable("execution_error", str(e).splitlines()[0][:300]) from None
 
