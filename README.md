@@ -77,10 +77,15 @@ The model's output is treated as untrusted. There are five layers. Each is cover
 | 1. Question screen | Refuses obvious write requests, SQL fragments, file paths, instruction-override phrases, requests for secrets, and real-time or forecast questions before any model call. This saves a model call, but it is not the safety boundary. | `guard.py` |
 | 2. Prompt | Gives the schema and asks for one SELECT or `CANNOT_ANSWER`. The question is labelled as data, not instructions. Database values found in the question are listed with their stored spelling. | `llm.py` |
 | 3. Validator | Parses the SQL with sqlglot (DuckDB dialect), then applies these checks:<ul><li>exactly one statement, and it must be SELECT, UNION, INTERSECT or EXCEPT;</li><li>no DDL, DML, PRAGMA, SET, COPY, ATTACH, INSTALL or parameter nodes anywhere in the tree;</li><li>tables must be on a list of 9, and cannot be schema-qualified or table functions such as `read_csv`;</li><li>every table reference is resolved in the scope where it is used, so a WITH-clause name only counts where that CTE is visible; CTE names may not shadow system views or the allowed tables; recursive CTEs and `USING SAMPLE` are refused;</li><li>columns and functions must be on allow-lists;</li><li>a LIMIT is added or enforced: the query fetches at most 201 rows, so the answer can say it was cut at 200.</li></ul>Refused SQL gets **one** repair attempt, with the error sent back to the model. A second failure is refused. | `validator.py`, `ask.py` |
-| 4. Connection | The database file is opened read-only. After the spatial extension loads, the connection sets `enable_external_access = false` (no files, no URLs), limits memory and threads, and locks its configuration. Each query has a 5 s time limit, enforced by interrupting it. Results are read one row at a time and refused if a value is longer than 10,000 characters or the answer passes 5 MB. | `db.py` |
+| 4. Connection | The database file is opened read-only. After the spatial extension loads, the connection sets `enable_external_access = false` (no files, no URLs), limits memory and threads, and locks its configuration. Each query has a 5 s time limit, enforced by interrupting it. Results are read one row at a time: strings, including nested values and map keys, are capped at 10,000 characters, and the result rows at 5 MB of encoded JSON before map geometry and response metadata. Nested binary values, non-string map keys, unsupported types and excessive nesting are refused with an explanation. | `db.py` |
 | 5. Hidden geometry | Polygons live in `*_shapes` tables that are not on the allow-list. The API adds geometry after the query has run. | `geo.py` |
 
 Every answer returns the SQL that actually ran (after the LIMIT rewrite) and the row count. A refusal returns a reason code instead of SQL.
+
+Lists and string-keyed maps retain their structure in query results; dates use ISO text, while decimals and intervals
+keep their JSON representation. Non-finite numbers become `null`, as for scalar results. Binary values, including
+`list(ST_Point(...))`, produce `unsupported_result` instead of an HTTP 500 or silently missing values. The normal
+one-repair path can replace those with scalar coordinates; attempted SQL and the refusal remain in the audit trail.
 
 ### Review on 2026-09-28
 
@@ -258,7 +263,7 @@ The browser check above returns 150 stops matching both the area choice and the 
 
 ## Tests
 
-- **Backend** (`backend/tests`, 314 pytest tests; mostly on a hand-made fixture of 9 stops, 2 planning areas and 3 subzones, plus focused synthetic catalog/size fixtures):
+- **Backend** (`backend/tests`, 329 pytest tests; mostly on a hand-made fixture of 9 stops, 2 planning areas and 3 subzones, plus focused synthetic catalog/size fixtures):
   - The validator accepts reads and refuses 42 kinds of unsafe SQL, including the review's CTE-shadowing payloads.
   - The question screen passes ordinary questions that use watched words and refuses edit, real-time and secret requests.
   - The read-only connection:
@@ -275,6 +280,7 @@ The browser check above returns 150 stops matching both the area choice and the 
     - runs the question screen before the model.
   - The API contract, including status codes, 404 and 422 errors, and the response shape.
   - Simultaneous and concurrent database readers, incompatible locked settings, and connection cleanup after initialization failure.
+  - Nested aggregates, binary geometry refusal and repair, non-string map keys, nesting limits and actual UTF-8 result budgets.
   - Outer-join results with missing endpoints, mixed-type location keys and invalid coordinates; map filtering never deletes table rows.
   - **Spatial correctness against hand calculations:**
     - SVY21's false origin maps to E 28001.642 m, N 38744.572 m;

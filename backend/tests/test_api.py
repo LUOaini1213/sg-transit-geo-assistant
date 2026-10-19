@@ -127,3 +127,53 @@ def test_outer_join_answer_keeps_null_rows_and_maps_only_known_pairs(client_for)
     mapped = [(f["properties"]["origin_stop"], f["properties"]["destination_stop"])
               for f in answer["geojson"]["features"]]
     assert sorted(mapped) == sorted(tuple(r) for r in answer["rows"] if r[1] is not None)
+
+
+@pytest.mark.parametrize("sql, detail", [
+    ("SELECT list(ST_Point(x_m, y_m)) AS locations FROM stops", "binary results"),
+    (r"SELECT list(CAST('\xFF' AS BLOB)) AS payload FROM stops", "binary results"),
+    ("SELECT CAST(CAST('{\"1\": \"bus\"}' AS JSON) AS MAP(INTEGER, VARCHAR)) AS payload", "string keys"),
+])
+def test_unsupported_nested_results_return_auditable_refusal(client_for, sql, detail):
+    c, chat = client_for(sql, sql)
+    with c:
+        response = c.post("/api/ask", json={"question": "Show stop locations", "engine": "llm"})
+        assert c.get("/api/health").json()["stops"] == 9
+    assert response.status_code == 200
+    answer = response.json()
+    assert answer["status"] == "refused" and answer["reason"] == "invalid_after_repair"
+    assert "unsupported_result" in answer["detail"] and detail in answer["detail"]
+    assert answer["rows"] == [] and answer["sql"] is None and answer["geojson"] is None
+    assert len(chat.calls) == 2
+    assert [attempt["sql"] for attempt in answer["attempts"]] == [sql, sql]
+    assert all("unsupported_result" in attempt["error"] for attempt in answer["attempts"])
+
+
+def test_binary_geometry_can_be_repaired_to_scalar_coordinates(client_for):
+    binary = "SELECT list(ST_Point(x_m, y_m)) AS locations FROM stops"
+    scalar = "SELECT stop_code, longitude, latitude FROM stops ORDER BY stop_code"
+    c, chat = client_for(binary, scalar)
+    with c:
+        response = c.post("/api/ask", json={"question": "Show stop locations", "engine": "llm"})
+    assert response.status_code == 200
+    answer = response.json()
+    assert answer["status"] == "answered" and answer["row_count"] == 9
+    assert answer["sql"] == scalar + " LIMIT 201"
+    assert len(answer["geojson"]["features"]) == 9
+    assert "unsupported_result" in answer["attempts"][0]["error"] and len(chat.calls) == 2
+
+
+def test_nested_scalar_results_keep_json_contract(client_for):
+    sql = ("SELECT list(stop_code ORDER BY stop_code) AS codes, list(CAST('2026-10-19' AS DATE)) AS dates, "
+           "list(CAST('NaN' AS DOUBLE)) AS missing, list(CAST('1.250' AS DECIMAL(10, 3))) AS amounts, "
+           "CAST('12:30:00' AS INTERVAL) AS duration FROM stops")
+    c, chat = client_for(sql)
+    with c:
+        response = c.post("/api/ask", json={"question": "Show stop information", "engine": "llm"})
+    assert response.status_code == 200
+    answer = response.json()
+    assert answer["status"] == "answered" and len(chat.calls) == 1
+    row = answer["rows"][0]
+    assert len(row[0]) == 9 and row[0][0] == "10011"
+    assert row[1] == ["2026-10-19"] * 9 and row[2] == [None] * 9
+    assert row[3] == ["1.250"] * 9 and row[4] == "PT12H30M"
