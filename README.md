@@ -2,6 +2,14 @@
 
 A web map of Singapore's public bus network that you can question in plain English. Each answer comes back as three things: a layer on the map, a table, and the exact SQL query that produced them, with its row count.
 
+**At a glance**
+
+- **Built:** FastAPI, DuckDB and React/MapLibre over the 2026 bus network (5,209 stops; 334,516 stop-to-stop OD rows). A local language model, or a keyword-rule engine that needs no model, writes the SQL. A sqlglot allow-list checks it, and a read-only, locked DuckDB connection runs it.
+- **Model accuracy** (archived run, 2026-09-28, test split of 26 questions): qwen2.5:3b 16/26 (62%), qwen3.5:4b 22/26 (85%) ([3B summary](eval/results/summary.json), [4B summary](eval/results/summary_qwen35.json)).
+- **Keyword rules** (2026-10-03, on questions the rules were revised against, so not a held-out test): 48/52 answerable questions right, 0 wrong answers, 16/16 adversarial prompts refused ([summary](eval/results/summary_review_20261003.json)).
+- **Checks:** 343 pytest tests and 51 planted bugs, all caught, cover the validator, the read-only connection, the question screen and the prompt. In the recorded runs, every prompt that was not refused ran as a read-only SELECT.
+- **Limits:** the evaluation needs the full database, built from LTA DataMall files that this repository does not redistribute, so its numbers cannot be rerun from a clean clone ([the fixture](#try-it-on-the-fixture) runs the app and the tests). The 68 questions were written by one person, and the model figures predate the 2026-10-03 rule and entity-hint changes.
+
 Questions it can answer:
 
 - Which bus stops are within 300 m of stop 08057?
@@ -9,7 +17,7 @@ Questions it can answer:
 - How many weekday trips go from Tampines to Bedok?
 - Where do passengers boarding at Boon Lay Int go?
 
-A language model writes the SQL. The SQL is parsed and checked against an allow-list before it runs, on a read-only database connection. There is also a keyword-rule engine that needs no model. Both engines are measured on a hand-written question set. The results, including the failures, are below.
+Both engines are measured on a hand-written question set. The results, including the failures, are below.
 
 This is a personal project built in 2026. The data is from August and September 2026.
 
@@ -89,6 +97,9 @@ one-repair path can replace those with scalar coordinates; attempted SQL and the
 
 ### Review on 2026-09-28
 
+<details>
+<summary>Three validator problems a separate review found, and how each was fixed</summary>
+
 A separate review tried to break the checks above and found three problems, all confirmed and fixed:
 
 - **A WITH-clause name could shadow a system view.** CTE names were collected from the whole query, so
@@ -105,6 +116,8 @@ A separate review tried to break the checks above and found three problems, all 
 The review also found that the question screen refused ordinary questions ("Which stops saw boardings change from July
 to August?", "Which services arrive at Boon Lay Int most often?"). Two over-broad rules were narrowed. What the
 narrowed screen still gets wrong is measured on a new held-out set (below).
+
+</details>
 
 The model can see this schema: `stops`, `services`, `route_stops`, `od_stop_flows`, `od_area_flows`, `planning_areas`, `subzones`, `corridor_links` and `stop_changes`. The full column list is at `/api/schema` and in `backend/app/schema.py`.
 
@@ -142,6 +155,12 @@ first on baseline `cad5008`, then on the revised rules. No model endpoint was ca
 results were not replaced. This is a **known-question regression comparison**, not a new held-out benchmark:
 the revised rules and tests were developed with the reported failures in view.
 
+The revised run was measured at commit `1fa2e65` (PR #1); its backend file hashes are in the provenance record below.
+Backend files changed since that run: `ask.py`, `db.py` and `templates.py`. PR #2 changed how `ask.py` and `db.py`
+handle nested result values; the 2026-11-03 review stopped the rules from writing a filter twice
+(`planning_area = 'X' AND stops.planning_area = 'X'`), which gives the same rows. The table has not been rerun at
+the current commit, because that needs the full database (`python eval/check_readme.py` keeps this list current).
+
 | Rules | Correct, dev | Correct, test | Wrong answers given, test | Refused answerable, test | Adversarial refused |
 |---|---|---|---|---|---|
 | Baseline `cad5008` | 26/26 | 7/26 | 13 | 6 | 16/16 |
@@ -164,6 +183,9 @@ answer is not evidence of correctness. The set is reused, not a fresh independen
 ### Archived model comparison (2026-09-28)
 
 All numbers are copied from [`eval/results/REPORT.md`](eval/results/REPORT.md), which `eval/report.py` generates from the per-question files in `eval/results/`.
+The keyword-rule row is the rules as they were on 2026-09-28. The 22/26 in the table above is the same test split
+after the rules were revised against these failures, so the two rule rows are not a contradiction, and the revised
+rules have not been compared with a model on new questions.
 
 | Engine | Answerable, dev | **Answerable, test** | 95% interval, test | Wrong answers given, test | Adversarial refused (dev + test) | Median latency, test | p90 latency, test |
 |---|---|---|---|---|---|---|---|
@@ -251,6 +273,9 @@ These are the model's wrong answers on the test split, from `REPORT.md`:
 
 ## Reliability review (2026-10-03)
 
+<details>
+<summary>Front-end and fallback fixes from the 2026-10-03 review</summary>
+
 - **A selection owns its response.** Clicking another stop, closing details, clearing results or starting a new question cancels the superseded request and ignores a late response. A new question clears the previous answer and OD lines immediately; a failed request leaves an error, not the previous question's table. Clearing results preserves the question text.
 - **Map state follows the current data.** Layer toggles and results set before the map loads are applied once it is ready. Replacing or clearing a layer also removes its popup. Effect cleanup/remount (including React development hot reload) cannot update a removed map instance.
 - **Missing locations do not destroy an answer.** An outer join can return a stop with no destination. Those rows remain in the table; only valid points, lines and polygons are mapped. NULL, mixed-type location keys and non-finite/out-of-range coordinates are skipped, and the panel reports when only part of a result can be mapped.
@@ -261,11 +286,15 @@ These are the model's wrong answers on the test split, from `REPORT.md`:
 
 The browser check above returns 150 stops matching both the area choice and the passenger threshold.
 
+</details>
+
 ## Tests
 
-- **Backend** (`backend/tests`, 329 pytest tests; mostly on a hand-made fixture of 9 stops, 2 planning areas and 3 subzones, plus focused synthetic catalog/size fixtures):
+- **Backend** (`backend/tests`, 343 pytest tests; mostly on a hand-made fixture of 9 stops, 2 planning areas and 3 subzones, plus focused synthetic catalog/size fixtures):
   - The validator accepts reads and refuses 42 kinds of unsafe SQL, including the review's CTE-shadowing payloads.
   - The question screen passes ordinary questions that use watched words and refuses edit, real-time and secret requests.
+  - The prompt labels the question as data, not instructions, puts it only in the user message, and lists matched database values with their stored spelling (`test_llm.py`).
+  - The keyword rules write each filter once, and keep a filter on the other side of a self-join.
   - The read-only connection:
     - rejects writes;
     - blocks file reads;
@@ -299,9 +328,9 @@ The browser check above returns 150 stops matching both the area choice and the 
   - MapView with a fake MapLibre boundary: updates before load, current callbacks, popup disposal, unmount and state-preserving effect remount. A real browser separately checks actual MapLibre rendering and hot reload.
 - **End-to-end** (`scripts/screenshots.py`, Playwright, headless Chromium). It loads the app, asks four questions, clicks a stop on the map and checks the phone layout for horizontal scrolling. It also takes the screenshots above.
 - **Mutation check** (`backend/tests/mutate.py`).
-  - It plants 47 bugs, one at a time, across the validator, the connection, the pipeline, the question screen, the keyword rules, the spatial build, the map layers and the API.
+  - It plants 51 bugs, one at a time, across the validator, the connection, the pipeline, the question screen, the prompt, the keyword rules, the spatial build, the map layers and the API.
   - Before it starts, the unmodified code must pass. Each mutant must also compile and import, so that a broken file cannot count as a kill.
-  - All 47 are killed. One earlier mutant (disabling the whole-query table check) was dropped after the review, because the new per-scope check refuses exactly the same queries; the check stays as a second line.
+  - All 51 are killed. One earlier mutant (disabling the whole-query table check) was dropped after the review, because the new per-scope check refuses exactly the same queries; the check stays as a second line.
   - The first run let 3 through. The lock-configuration test used a setting that DuckDB refuses to change anyway. The quote-escaping and road-name tests used fixture data that could not tell right from wrong. The fixture and tests were changed until every mutant was killed.
 
 ## Limits
@@ -318,24 +347,67 @@ The browser check above returns 150 stops matching both the area choice and the 
 
 **Requirements:**
 
-- Python 3.11 or 3.12
-- Node 24
-- a local clone of [sg-bus-network-monitor](https://github.com/LUOaini1213/sg-bus-network-monitor) that has run its own fetch scripts (its `data/raw/` holds the LTA DataMall files)
+- Python 3.11 or 3.12 (CI tests both)
+- Node 24, for the web app
+- for the full data only: a clone of [sg-bus-network-monitor](https://github.com/LUOaini1213/sg-bus-network-monitor) with the files listed under [Full data](#full-data)
 - optionally, [Ollama](https://ollama.com) with `ollama pull qwen2.5:3b` (the `-16k` tag used here is that model with a 16k context)
 
+The first database build or API start downloads DuckDB's `spatial` extension once (into `~/.duckdb/extensions`), so
+that step needs internet access.
+
+### Try it on the fixture
+
+No LTA data, model or Docker is needed. The fixture is the invented 9-stop network the tests use (planning areas
+`ALPHA` and `BETA`), so only questions about it give answers.
+
 ```bash
-# 1. Data: read the source repository (read-only) and build the database (a few seconds)
 python -m venv .venv && . .venv/bin/activate          # Windows: .venv\Scripts\activate
 pip install -r backend/requirements-dev.txt
+python scripts/smoke_fixture.py                      # builds the fixture, starts the API, asks one question, checks [[5]]
+
+# or step by step (the full-data build below replaces this file)
+python -m backend.app.build data/fixture data/transit.duckdb
+uvicorn backend.app.main:app --port 8000             # docs at http://127.0.0.1:8000/docs
+# in a second terminal:
+curl -s -X POST http://127.0.0.1:8000/api/ask -H "Content-Type: application/json" \
+  -d '{"question": "How many bus stops are there in Alpha?", "engine": "template"}'
+```
+
+### Full data
+
+`scripts/prepare_from_sg_bus.py` reads these files from the sg-bus-network-monitor clone and refuses to run if one is
+missing:
+
+- `data/raw/datamall/BusStops_20260926.json`, `BusRoutes_20260926.json`, `BusServices_20260926.json` and
+  `origin_destination_bus_202608.csv`, fetched by that repository's `src/datamall.py`, which needs a free
+  [LTA DataMall](https://datamall.lta.gov.sg) account key in the `LTA_KEY` environment variable
+  (`LTA_KEY=... python src/datamall.py static pv` and `LTA_KEY=... python src/datamall.py od 202608 202607`);
+- `data/raw/mp2019_planning_area.geojson` (its `src/fetch_public.py`, no key) and its analysis outputs in `outputs/`.
+
+The bus stop, route and service files are a snapshot of the network on the day they are fetched, and DataMall serves
+passenger-volume files only for recent months. A fetch made later therefore gets differently named files and a
+different network, and may no longer get August 2026 at all. The database behind the evaluation needs those exact
+files; its sha256 and row counts are in [the provenance record](eval/results/provenance_review_20261003.json).
+
+```bash
 python scripts/prepare_from_sg_bus.py ../sg-bus-network-monitor   # writes data/staging/ (not committed)
 python -m backend.app.build data/staging data/transit.duckdb
-
-# 2. API on :8000 (docs at http://127.0.0.1:8000/docs)
 uvicorn backend.app.main:app --port 8000
-
-# 3. Web app on :5173, forwarding /api to :8000
-cd frontend && npm ci && npm run dev
+cd frontend && npm ci && npm run dev                 # web app on :5173, forwarding /api to :8000
 ```
+
+**Settings** (environment variables, read in `backend/app/config.py`):
+
+| Variable | Default | Meaning |
+|---|---|---|
+| `TRANSIT_DB` | `data/transit.duckdb` | the database file the API and `eval/run_eval.py` open |
+| `LLM_BASE_URL` | `http://127.0.0.1:11434/v1` | any OpenAI-compatible chat endpoint (Ollama by default) |
+| `LLM_MODEL` | `qwen2.5:3b-16k` | model name at that endpoint |
+| `LLM_API_KEY` | `not-needed` | key for a hosted endpoint; read from the environment only |
+| `LLM_REASONING_EFFORT` | unset | `none` turns off the thinking phase of reasoning models such as qwen3.5 |
+| `LLM_TIMEOUT_S` | `120` | seconds to wait for the model |
+| `MAX_ROWS` | `200` | rows returned per answer (the query fetches one more to detect the cut) |
+| `QUERY_TIMEOUT_S` | `5` | time limit per query, in seconds |
 
 With Docker (the API uses `data/transit.duckdb` if it exists, otherwise the test fixture):
 
@@ -348,12 +420,15 @@ Tests and checks, as run in CI:
 ```bash
 python -m pytest -q backend/tests
 python backend/tests/mutate.py
+python eval/check_readme.py                          # README numbers = committed result files and test counts
+python scripts/smoke_fixture.py
 cd frontend && npm test && npm run build
 ```
 
 Evaluation (needs the full database; the model runs need Ollama):
 
 ```bash
+python eval/run_eval.py --engines template --tag rules_only                # keyword rules only, no model
 python eval/run_eval.py                                                    # keyword rules + default model
 LLM_MODEL=qwen3.5:4b LLM_REASONING_EFFORT=none python eval/run_eval.py --tag qwen35
 python eval/run_eval.py --kind adversarial --no-prescreen --tag noscreen   # screen-off check
@@ -381,8 +456,9 @@ To use a hosted model instead, set `LLM_BASE_URL`, `LLM_MODEL` and `LLM_API_KEY`
 backend/app/        FastAPI app: validator, guard, llm, templates, ask, geo, db, build, schema
 backend/tests/      pytest suite and mutate.py
 data/fixture/       hand-made test network (invented names and numbers)
-eval/               question set, runner, comparison, report generator, results
+eval/               question set, runner, comparison, report generator, README check, results
 frontend/           React + TypeScript + MapLibre app
-scripts/            prepare_from_sg_bus.py (data), screenshots.py (end-to-end check + screenshots)
+scripts/            prepare_from_sg_bus.py (data), smoke_fixture.py (API on the fixture),
+                    screenshots.py (end-to-end check + screenshots)
 docs/screenshots/   images used above
 ```
