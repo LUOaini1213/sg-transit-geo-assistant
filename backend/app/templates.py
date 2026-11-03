@@ -270,8 +270,35 @@ class TemplateEngine:
             table = candidates[-1]
             return f"{table.alias_or_name}.{name}"
 
+        def resolved(node):
+            # Qualify a bare column when exactly one table in the query has it, so that 'planning_area' and
+            # 'stops.planning_area' compare equal, while 'a.x_m' and 'b.x_m' in a self-join stay distinct.
+            node = node.unnest().copy()
+            for c in node.find_all(exp.Column):
+                if not c.table:
+                    owners = [t for t in tables if c.name in TABLES.get(t.name, {}).get("columns", ())]
+                    if len(owners) == 1:
+                        c.set("table", exp.to_identifier(owners[0].alias_or_name))
+            return node
+
+        def restrict(predicate):
+            """AND a filter onto the rule's WHERE, unless the same conjunct is already there."""
+            where = tree.args.get("where")
+            if where is not None:
+                conjuncts, pending = [], [where.this]
+                while pending:  # every top-level AND operand, looking through parentheses
+                    node = pending.pop().unnest()
+                    if isinstance(node, exp.And):
+                        pending += [node.left, node.right]
+                    else:
+                        conjuncts.append(node)
+                new = resolved(sqlglot.parse_one(predicate, read="duckdb"))
+                if any(resolved(c) == new for c in conjuncts):
+                    return
+            tree.where(predicate, append=True, copy=False)
+
         def add(name, op, value):
-            tree.where(f"{column(name)} {op} {value}", append=True, copy=False)
+            restrict(f"{column(name)} {op} {value}")
 
         # The source contains monthly average weekdays, not weekend/day-specific
         # observations or a time series. Do not relabel August as another period.
@@ -354,17 +381,17 @@ class TemplateEngine:
             elif len(areas) != 2:
                 refuse("State which planning areas are origins and which are destinations.")
         elif areas:
-            tree.where(_in(column("planning_area"), areas), append=True, copy=False)
+            restrict(_in(column("planning_area"), areas))
         area_mentions, subzone_mentions = self._administrative_mentions(question)
         subzones = [name for _, _, name in subzone_mentions]
         if subzones:
-            tree.where(_in(column("subzone"), subzones), append=True, copy=False)
+            restrict(_in(column("subzone"), subzones))
         roads = self.roads_in(question)
         if roads:
-            tree.where(_in(column("road_name"), roads), append=True, copy=False)
+            restrict(_in(column("road_name"), roads))
         regions = self.regions_in(question)
         if regions:
-            tree.where(_in(column("region"), regions), append=True, copy=False)
+            restrict(_in(column("region"), regions))
         peak_hour = re.search(r"\b(?:busiest|peak)\s+(?:boarding\s+)?hour\s+(?:at|is|of)\s+(\d{1,2})\s*(am|pm)?\b", plain)
         if peak_hour:
             hour = int(peak_hour[1])

@@ -277,3 +277,32 @@ def test_change_details_keep_metric_date_and_baseline(make_assistant, question):
 def test_source_stop_anchor_does_not_swallow_destination_clause(make_assistant, question):
     ans = run(make_assistant, question)
     assert [row[0] for row in ans.rows] == ["20011", "20012"]
+
+
+# Review 2026-11-03: the constraint pass appended a filter the rule had already written, so the SQL shown to the
+# user read "WHERE planning_area = 'ALPHA' AND stops.planning_area = 'ALPHA'".
+@pytest.mark.parametrize("q, predicate, n", [
+    ("How many bus stops are there in Alpha?", "planning_area = 'ALPHA'", 1),
+    ("How many bus stops are on Alpha Rd?", "road_name = 'Alpha Rd'", 1),
+    ("Which 2 bus stops in Beta have the most weekday boardings?", "planning_area = 'BETA'", 1),
+    ("How many bus stops are there in Alpha or Beta?", "planning_area IN (", 1),
+    ("List the subzones in Alpha where less than 70% of residents are within a 400 m walk of a stop.",
+     "planning_area = 'ALPHA'", 1),
+    # a filter that is not already there is still added, and both stay
+    ("How many bus stops in Alpha are on Alpha Rd?", "road_name = 'Alpha Rd'", 1),
+    ("Which bus stops in Alpha have more than 100 weekday boardings?", "weekday_boardings >", 1),
+])
+def test_rule_sql_states_each_filter_once(engine, q, predicate, n):
+    sql = engine.to_sql(q)
+    assert sql.count(predicate) == n, sql
+
+
+def test_filter_on_the_other_alias_of_a_self_join_is_kept(engine):
+    # 'a' is the reference stop and 'b' the returned stops: b.planning_area is a new filter, not a duplicate
+    sql = engine.to_sql("Which stops within 400 m of stop 10011 are in Beta?")
+    assert "b.planning_area = 'BETA'" in sql, sql
+
+
+def test_deduplicated_filter_keeps_the_answer(make_assistant):
+    ans = run(make_assistant, "How many bus stops are there in Alpha?")
+    assert ans.sql.count("planning_area = 'ALPHA'") == 1 and ans.rows == [[5]]
