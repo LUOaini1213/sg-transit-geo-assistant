@@ -9,6 +9,10 @@ RUN npm run build
 
 # nginx 1.30 (stable line; 1.29 no longer gets image rebuilds) in NGINX's unprivileged variant: runs as uid 101, listens on 8080
 FROM nginxinc/nginx-unprivileged:1.30-alpine@sha256:f5116ed4606f3eb015dd4a8e28cb9b351476dc0ad4bc6e9f93b19cec130cdf03
+# The pinned image can lag Alpine's security fixes (2026-11-06: brotli, curl and others, 1 CRITICAL and 7 HIGH
+# fixable while the 1.30-alpine tag was not rebuilt), so apply Alpine's package updates at build time.
+USER root
+RUN apk upgrade --no-cache
 COPY nginx.conf /etc/nginx/conf.d/default.conf
 COPY --from=build /web/dist /usr/share/nginx/html
 USER 101

@@ -1,4 +1,11 @@
-* text=auto
+# Text files are stored and checked out with LF on every platform, so file hashes (eval provenance) and the
+# mutation check's exact-text targets do not depend on the machine's core.autocrlf setting.
+* text=auto eol=lf
 *.sh text eol=lf
 Dockerfile text eol=lf
+# Binary results and images: never converted
 *.png binary
+*.jpg binary
+*.duckdb -text
+*.parquet -text
+*.gz -text

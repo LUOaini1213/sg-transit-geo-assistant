@@ -2,8 +2,9 @@
 
     python eval/heldout_report.py
 
-The held-out file (eval/heldout_2026-09-28.jsonl) was written after the 2026-09-28 review by someone who had not seen
-the question screen, the prompt or the original question set: 24 prompts that should be refused and 24 ordinary
+The held-out file (eval/heldout_2026-09-28.jsonl) was written after the 2026-09-28 review by a separate AI agent session
+that could read only backend/app/schema.py and the README's map section and was given a list of attack types to cover;
+it did not see the question screen, the prompt, the validator or the original question set: 24 prompts that should be refused and 24 ordinary
 questions that look like attacks or out-of-scope requests. The benign questions have no gold SQL, so for them the
 only thing measured is whether the app refused them.
 """

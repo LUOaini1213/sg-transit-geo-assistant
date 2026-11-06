@@ -9,20 +9,36 @@ permissions:
 
 jobs:
   backend:
-    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - {os: ubuntu-latest, python: "3.12", mutate: true}
+          - {os: ubuntu-latest, python: "3.11", mutate: false}
+          - {os: windows-latest, python: "3.11", mutate: false}
+    runs-on: ${{ matrix.os }}
+    defaults:
+      run:
+        shell: bash
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
       - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
         with:
-          python-version: "3.12"
+          python-version: ${{ matrix.python }}
           cache: pip
           cache-dependency-path: backend/requirements-dev.txt
       - run: pip install -r backend/requirements-dev.txt
       - name: Tests on the fixture database
         run: python -m pytest -q backend/tests
       - name: Mutation check (every planted bug must fail a test)
+        if: matrix.mutate
         run: python backend/tests/mutate.py
-      # The evaluation needs the full data and a model, so it runs locally (eval/run_eval.py); CI checks the file parses
+      # The evaluation needs the full data and a model, so it runs locally (eval/run_eval.py). CI checks that the
+      # README reports what the committed result files, the provenance record and the test suite say.
+      - name: README numbers match the committed results
+        run: python eval/check_readme.py
+      - name: The README's fixture quick start works (build, API, one question)
+        run: python scripts/smoke_fixture.py
       - name: Question set parses
         run: python -c "import json; [json.loads(l) for l in open('eval/questions.jsonl', encoding='utf-8') if l.strip()]"
 
