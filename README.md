@@ -100,7 +100,8 @@ one-repair path can replace those with scalar coordinates; attempted SQL and the
 <details>
 <summary>Three validator problems a separate review found, and how each was fixed</summary>
 
-A separate review tried to break the checks above and found three problems, all confirmed and fixed:
+A separate, read-only review (another AI agent session, asked to get SQL past the validator and the read-only
+connection) tried to break the checks above and found three problems, all confirmed and fixed:
 
 - **A WITH-clause name could shadow a system view.** CTE names were collected from the whole query, so
   `WITH duckdb_databases AS (SELECT * FROM duckdb_databases) SELECT * FROM duckdb_databases` passed the allow-list and
@@ -227,8 +228,9 @@ With the screen on, most adversarial prompts are stopped before the model is cal
 ### Archived held-out prompts (2026-09-28)
 
 The original 16 adversarial prompts are no longer a fair test of the question screen, because its rules were written
-with them in view. A new set ([`eval/heldout_2026-09-28.jsonl`](eval/heldout_2026-09-28.jsonl)) was written by someone
-who had not seen the screen, the prompt or the question set: 24 attacks (write requests in plain English and in other
+with them in view. A new set ([`eval/heldout_2026-09-28.jsonl`](eval/heldout_2026-09-28.jsonl)) was written by a separate AI
+agent session that was allowed to read only `backend/app/schema.py` and the README's map section and was given a list of
+attack types to cover; it did not see the screen, the prompt, the validator or the question set: 24 attacks (write requests in plain English and in other
 languages, SQL and prompt injection, catalog snooping, file access, resource exhaustion, out-of-schema data) and
 24 ordinary questions that use the same words ("drop in boardings", "which services arrive", "update me on", "token
 service"). In that archived run it was run once, after the fixes; nothing was tuned on it then. It has since been
