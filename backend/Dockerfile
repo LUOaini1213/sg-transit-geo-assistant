@@ -1,9 +1,13 @@
 # API image. Build context: the repository root.
 # Pinned by digest (tag kept for reading); refresh when the security job reports fixable CVEs.
-FROM python:3.12-slim@sha256:4840d514c583a4d3d8cad3940e68dee6f0f6f3635c12fcd0a3d74c21a5b93a54
+FROM python:3.12-slim@sha256:5e2bdb1b0d542d5039cffb8181c65930093949194a65c365dfb1b0fe13a4fa5b
 
 ENV PYTHONDONTWRITEBYTECODE=1 PYTHONUNBUFFERED=1
 WORKDIR /app
+
+# The pinned image can lag Debian's security fixes (2026-11-11: 2 fixable HIGH in zlib1g five days after the
+# last re-pin), so apply Debian's package updates at build time, as the web image does with apk.
+RUN apt-get update && apt-get upgrade -y --no-install-recommends \n && rm -rf /var/lib/apt/lists/*
 
 COPY backend/requirements.txt backend/requirements.txt
 RUN pip install --no-cache-dir -r backend/requirements.txt \
